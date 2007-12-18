@@ -22,12 +22,6 @@
         "Entry"
         {
         "MsmKey" = "8:_08E003C4AD671D4F2274D3B872DF8FB8"
-        "OwnerKey" = "8:_201E3FBB8B2643779A98D2CE23841999"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_08E003C4AD671D4F2274D3B872DF8FB8"
         "OwnerKey" = "8:_5C4CFA5A78820547A9FC5BC3C6B084C2"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -35,6 +29,12 @@
         {
         "MsmKey" = "8:_08E003C4AD671D4F2274D3B872DF8FB8"
         "OwnerKey" = "8:_58ECB49E5F3462B9C65EA69F925A16FD"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_08E003C4AD671D4F2274D3B872DF8FB8"
+        "OwnerKey" = "8:_201E3FBB8B2643779A98D2CE23841999"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1083,7 +1083,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
