@@ -26,10 +26,10 @@ namespace PipelineHints
             set { _segment = value; }
         }
 
-        public SegmentAssemblyNameAttribute(PipelineSegment component, String Name)
+        public SegmentAssemblyNameAttribute(PipelineSegment segment, String Name)
         {
             _name = Name;
-            _segment = component;
+            _segment = segment;
         }
     }
 
