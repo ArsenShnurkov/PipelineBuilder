@@ -63,6 +63,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AddInView\AddInView.csproj">
+      <Project>{16337041-7967-452A-BCE4-91E0DDDC2E72}</Project>
+      <Name>AddInView</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\PipelineBuilder.Samples.Events.Contracts\PipelineBuilder.Samples.Events.Contracts.csproj">
+      <Project>{354C6213-7563-485E-8A03-38C613F8E513}</Project>
+      <Name>PipelineBuilder.Samples.Events.Contracts</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="DocumentOpenedEventArgsAddInAdapter.generated.cs" />
     <Compile Include="DocumentOpenedEventArgsContractToViewAddInAdapter.generated.cs" />
     <Compile Include="DocumentOpenedEventArgsViewToContractAddInAdapter.generated.cs" />
@@ -74,18 +86,6 @@
     <Compile Include="ISampleAddInAddInAdapter.generated.cs" />
     <Compile Include="ISampleAddInContractToViewAddInAdapter.generated.cs" />
     <Compile Include="ISampleAddInViewToContractAddInAdapter.generated.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AddInView\AddInView.csproj">
-      <Project>{16337041-7967-452A-BCE4-91E0DDDC2E72}</Project>
-      <Name>AddInView</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\PipelineBuilder.Samples.Events.Contracts\PipelineBuilder.Samples.Events.Contracts.csproj">
-      <Project>{354C6213-7563-485E-8A03-38C613F8E513}</Project>
-      <Name>PipelineBuilder.Samples.Events.Contracts</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

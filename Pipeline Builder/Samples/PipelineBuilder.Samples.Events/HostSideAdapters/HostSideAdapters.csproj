@@ -63,6 +63,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HostView\HostView.csproj">
+      <Project>{43BEBFE0-97CD-4216-AA05-A382975FEEA7}</Project>
+      <Name>HostView</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\PipelineBuilder.Samples.Events.Contracts\PipelineBuilder.Samples.Events.Contracts.csproj">
+      <Project>{354C6213-7563-485E-8A03-38C613F8E513}</Project>
+      <Name>PipelineBuilder.Samples.Events.Contracts</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="DocumentOpenedEventArgsContractToViewHostAdapter.generated.cs" />
     <Compile Include="DocumentOpenedEventArgsHostAdapter.generated.cs" />
     <Compile Include="DocumentOpenedEventArgsViewToContractHostAdapter.generated.cs" />
@@ -74,18 +86,6 @@
     <Compile Include="ISampleAddInContractToViewHostAdapter.generated.cs" />
     <Compile Include="ISampleAddInHostAdapter.generated.cs" />
     <Compile Include="ISampleAddInViewToContractHostAdapter.generated.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HostView\HostView.csproj">
-      <Project>{43BEBFE0-97CD-4216-AA05-A382975FEEA7}</Project>
-      <Name>HostView</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\PipelineBuilder.Samples.Events.Contracts\PipelineBuilder.Samples.Events.Contracts.csproj">
-      <Project>{354C6213-7563-485E-8A03-38C613F8E513}</Project>
-      <Name>PipelineBuilder.Samples.Events.Contracts</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

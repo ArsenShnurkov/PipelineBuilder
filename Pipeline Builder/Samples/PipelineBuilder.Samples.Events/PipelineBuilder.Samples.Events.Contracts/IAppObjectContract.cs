@@ -15,7 +15,7 @@ namespace PipelineBuilder.Samples.Events.Contracts
         void DocumentOpenedRemove(IDocumentOpenedHandlerContract handler);
     }
 
-    [Event]
+    [EventHandler]
     public interface IDocumentOpenedHandlerContract : IContract 
     {
         void Handle(IDocumentOpenedEventArgsContract args);
