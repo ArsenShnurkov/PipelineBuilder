@@ -52,53 +52,6 @@ namespace VSPipelineBuilder
             label1.TabIndex = 3;
             label1.Text = "Contract Source Project";
             // 
-            // b_ok
-            // 
-            this.b_ok.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.b_ok.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.b_ok.Location = new System.Drawing.Point(11, 170);
-            this.b_ok.Name = "b_ok";
-            this.b_ok.Size = new System.Drawing.Size(75, 23);
-            this.b_ok.TabIndex = 0;
-            this.b_ok.Text = "Ok";
-            this.b_ok.UseVisualStyleBackColor = true;
-            // 
-            // b_cancel
-            // 
-            this.b_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.b_cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.b_cancel.Location = new System.Drawing.Point(92, 170);
-            this.b_cancel.Name = "b_cancel";
-            this.b_cancel.Size = new System.Drawing.Size(75, 23);
-            this.b_cancel.TabIndex = 1;
-            this.b_cancel.Text = "Cancel";
-            this.b_cancel.UseVisualStyleBackColor = true;
-            // 
-            // c_projects
-            // 
-            this.c_projects.FormattingEnabled = true;
-            this.c_projects.Location = new System.Drawing.Point(14, 35);
-            this.c_projects.Name = "c_projects";
-            this.c_projects.Size = new System.Drawing.Size(318, 21);
-            this.c_projects.TabIndex = 2;
-            // 
-            // t_sourceOutput
-            // 
-            this.t_sourceOutput.Location = new System.Drawing.Point(14, 82);
-            this.t_sourceOutput.Name = "t_sourceOutput";
-            this.t_sourceOutput.Size = new System.Drawing.Size(225, 20);
-            this.t_sourceOutput.TabIndex = 4;
-            // 
-            // b_projectOutput
-            // 
-            this.b_projectOutput.Location = new System.Drawing.Point(257, 79);
-            this.b_projectOutput.Name = "b_projectOutput";
-            this.b_projectOutput.Size = new System.Drawing.Size(75, 23);
-            this.b_projectOutput.TabIndex = 5;
-            this.b_projectOutput.Text = "Browse";
-            this.b_projectOutput.UseVisualStyleBackColor = true;
-            this.b_projectOutput.Click += new System.EventHandler(this.b_projectOutput_Click);
-            // 
             // label2
             // 
             label2.AutoSize = true;
@@ -117,9 +70,62 @@ namespace VSPipelineBuilder
             label3.TabIndex = 9;
             label3.Text = "Build Location";
             // 
+            // b_ok
+            // 
+            this.b_ok.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.b_ok.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.b_ok.Location = new System.Drawing.Point(257, 170);
+            this.b_ok.Name = "b_ok";
+            this.b_ok.Size = new System.Drawing.Size(75, 23);
+            this.b_ok.TabIndex = 0;
+            this.b_ok.Text = "Ok";
+            this.b_ok.UseVisualStyleBackColor = true;
+            // 
+            // b_cancel
+            // 
+            this.b_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.b_cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.b_cancel.Location = new System.Drawing.Point(338, 170);
+            this.b_cancel.Name = "b_cancel";
+            this.b_cancel.Size = new System.Drawing.Size(75, 23);
+            this.b_cancel.TabIndex = 1;
+            this.b_cancel.Text = "Cancel";
+            this.b_cancel.UseVisualStyleBackColor = true;
+            // 
+            // c_projects
+            // 
+            this.c_projects.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_projects.FormattingEnabled = true;
+            this.c_projects.Location = new System.Drawing.Point(14, 35);
+            this.c_projects.Name = "c_projects";
+            this.c_projects.Size = new System.Drawing.Size(399, 21);
+            this.c_projects.TabIndex = 2;
+            // 
+            // t_sourceOutput
+            // 
+            this.t_sourceOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.t_sourceOutput.Location = new System.Drawing.Point(14, 82);
+            this.t_sourceOutput.Name = "t_sourceOutput";
+            this.t_sourceOutput.Size = new System.Drawing.Size(318, 20);
+            this.t_sourceOutput.TabIndex = 4;
+            // 
+            // b_projectOutput
+            // 
+            this.b_projectOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.b_projectOutput.Location = new System.Drawing.Point(338, 79);
+            this.b_projectOutput.Name = "b_projectOutput";
+            this.b_projectOutput.Size = new System.Drawing.Size(75, 23);
+            this.b_projectOutput.TabIndex = 5;
+            this.b_projectOutput.Text = "Browse";
+            this.b_projectOutput.UseVisualStyleBackColor = true;
+            this.b_projectOutput.Click += new System.EventHandler(this.b_projectOutput_Click);
+            // 
             // b_buildOutput
             // 
-            this.b_buildOutput.Location = new System.Drawing.Point(256, 126);
+            this.b_buildOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.b_buildOutput.Location = new System.Drawing.Point(338, 126);
             this.b_buildOutput.Name = "b_buildOutput";
             this.b_buildOutput.Size = new System.Drawing.Size(75, 23);
             this.b_buildOutput.TabIndex = 8;
@@ -129,9 +135,11 @@ namespace VSPipelineBuilder
             // 
             // t_binaryOutput
             // 
+            this.t_binaryOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.t_binaryOutput.Location = new System.Drawing.Point(13, 129);
             this.t_binaryOutput.Name = "t_binaryOutput";
-            this.t_binaryOutput.Size = new System.Drawing.Size(225, 20);
+            this.t_binaryOutput.Size = new System.Drawing.Size(319, 20);
             this.t_binaryOutput.TabIndex = 7;
             // 
             // PipelineConfiguration
@@ -141,7 +149,7 @@ namespace VSPipelineBuilder
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.CancelButton = this.b_cancel;
-            this.ClientSize = new System.Drawing.Size(343, 199);
+            this.ClientSize = new System.Drawing.Size(425, 199);
             this.Controls.Add(label3);
             this.Controls.Add(this.b_buildOutput);
             this.Controls.Add(this.t_binaryOutput);
@@ -152,6 +160,7 @@ namespace VSPipelineBuilder
             this.Controls.Add(this.c_projects);
             this.Controls.Add(this.b_cancel);
             this.Controls.Add(this.b_ok);
+            this.MinimumSize = new System.Drawing.Size(441, 235);
             this.Name = "PipelineConfiguration";
             this.Text = "PipelineConfiguration";
             this.ResumeLayout(false);

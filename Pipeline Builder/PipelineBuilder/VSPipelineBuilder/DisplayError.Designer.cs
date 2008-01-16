@@ -37,14 +37,14 @@ namespace VSPipelineBuilder
             this.t_errorText.Location = new System.Drawing.Point(0, 0);
             this.t_errorText.Multiline = true;
             this.t_errorText.Name = "t_errorText";
-            this.t_errorText.Size = new System.Drawing.Size(284, 264);
+            this.t_errorText.Size = new System.Drawing.Size(624, 444);
             this.t_errorText.TabIndex = 1;
             // 
             // DisplayError
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 264);
+            this.ClientSize = new System.Drawing.Size(624, 444);
             this.Controls.Add(this.t_errorText);
             this.Name = "DisplayError";
             this.Text = "DisplayError";

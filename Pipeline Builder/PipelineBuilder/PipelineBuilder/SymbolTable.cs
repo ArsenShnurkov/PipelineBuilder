@@ -40,10 +40,23 @@ namespace PipelineBuilder
                 }
             }
             String contractNamespace = contractType.FullName.Remove(contractType.FullName.LastIndexOf("."));
-            if (contractNamespace.EndsWith(".Contracts") && !(component.Equals(SegmentType.ASA) || component.Equals(SegmentType.HSA)))
+            if (contractNamespace.EndsWith(".Contracts") || contractNamespace.EndsWith(".Contracts"))
             {
-                return contractNamespace.Remove(contractNamespace.LastIndexOf("."));
+                string viewNamespace = contractNamespace.Remove(contractNamespace.LastIndexOf("."));
+                if (!(component.Equals(SegmentType.ASA) || component.Equals(SegmentType.HSA)))
+                {
+                    return viewNamespace;
+                }
+                else if (component.Equals(SegmentType.ASA))
+                {
+                    return viewNamespace + ".AddInSideAdapters";
+                }
+                else if (component.Equals(SegmentType.HSA))
+                {
+                    return viewNamespace + ".HostSideAdapters";
+                }
             }
+            
             return _namespaceMapping[component];
         }
 
@@ -114,9 +127,13 @@ namespace PipelineBuilder
         internal void InitNamespace(Assembly asm)
         {
             String contractAssemblyName = _rootName;
-            if (contractAssemblyName.EndsWith(".Contracts"))
+            if (contractAssemblyName.EndsWith(".Contracts") || contractAssemblyName.EndsWith(".Contract"))
             {
-                contractAssemblyName = contractAssemblyName.Remove(contractAssemblyName.LastIndexOf(".Contracts"));
+                contractAssemblyName = contractAssemblyName.Remove(contractAssemblyName.LastIndexOf("."));
+            }
+            else if (contractAssemblyName.EndsWith("Contracts") || contractAssemblyName.EndsWith("Contracts"))
+            {
+                contractAssemblyName = contractAssemblyName.Remove(contractAssemblyName.LastIndexOf("Contract"));
             }
             _namespaceMapping[SegmentType.HAV] = contractAssemblyName;
             _namespaceMapping[SegmentType.HSA]=  contractAssemblyName + "HostAdapers";

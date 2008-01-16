@@ -446,9 +446,9 @@ namespace PipelineBuilder
         /// <param name="mi">MethodInfo from the original contract</param>
         /// <param name="fullyQualified">Should we use a namespace prefix for the view type</param>
         /// <returns></returns>
-        private CodeTypeReference GetEventViewType(SegmentType componentType, MethodInfo mi,bool fullyQualified)
+        private CodeTypeReference GetEventViewType(SegmentType componentType, MethodInfo mi,bool forAdapter)
         {
-            CodeTypeReference viewArgsType = GetEventArgsType(componentType, mi, fullyQualified);
+            CodeTypeReference viewArgsType = GetEventArgsType(componentType, mi, forAdapter);
             CodeTypeReference eventType = new CodeTypeReference(typeof(EventHandler<>));
             eventType.TypeArguments.Add(viewArgsType);
             eventType.UserData["eventArgsTypeName"] = viewArgsType.UserData["typeName"];
@@ -695,7 +695,7 @@ namespace PipelineBuilder
 
 
         //For a given method, marked as an event, get a type reference for the event args type for the view.
-        private CodeTypeReference GetEventArgsType(SegmentType componentType, MethodInfo mi, bool prefix)
+        private CodeTypeReference GetEventArgsType(SegmentType componentType, MethodInfo mi, bool forAdapter)
         {
             //The fist and only parameter should be for contract representing the delegate type
             if (mi.GetParameters().Length != 1)
@@ -720,7 +720,15 @@ namespace PipelineBuilder
                     throw new InvalidOperationException("More than one parameters have been specified for an event delegate: " + eventMethod.Name + " on " + eventMethod.ReflectedType.Name);
                 }
                 pi = eventMethod.GetParameters()[0];
-                String typeName = _symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.None, prefix);
+                String typeName;
+                if (forAdapter)
+                {
+                    typeName = _symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.None, true);
+                }
+                else
+                {
+                    typeName = _symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.None, mi.DeclaringType);
+                }
                 viewArgsType = new CodeTypeReference(typeName);
                 viewArgsType.UserData["typeName"] = typeName;
             }
@@ -970,7 +978,7 @@ namespace PipelineBuilder
                 {
                     CodeObjectCreateExpression adaptedArgs = new CodeObjectCreateExpression();
                     adaptedArgs.Parameters.Add(new CodeVariableReferenceExpression("args"));
-                    adaptedArgs.CreateType = new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ContractToView, false));
+                    adaptedArgs.CreateType = new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ContractToView, contractType));
                     CodeVariableDeclarationStatement adapterArgsDeclare = new CodeVariableDeclarationStatement(adaptedArgs.CreateType, "adaptedArgs");
                     CodeAssignStatement assignArgs = new CodeAssignStatement(new CodeVariableReferenceExpression("adaptedArgs"), adaptedArgs);
                     adaptArgs.Add(adapterArgsDeclare);
@@ -1102,7 +1110,7 @@ namespace PipelineBuilder
                             new CodeEventReferenceExpression(new CodeVariableReferenceExpression("_view"), attr.Name);
                         //Get the adapter for the event args type
                         CodeTypeReference adapterType =
-                            new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ContractToView, false));
+                            new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ContractToView, contractType));
                         CodeObjectCreateExpression adapterConstruct = new CodeObjectCreateExpression(adapterType, new CodeVariableReferenceExpression(pi.Name));
                         CodeDelegateCreateExpression handler = new CodeDelegateCreateExpression();
                         //Build the event handler
@@ -1287,18 +1295,18 @@ namespace PipelineBuilder
                 if (!TypeNeedsAdapting(pi.ParameterType))
                 {
                     //If the type doesn't need adapting just asign it directly
-                    set.Right = new CodeVariableReferenceExpression(pi.Name);
+                    set.Right = new CodePropertySetValueReferenceExpression();
                 }
                 else if (IsIListContract(pi.ParameterType))
                 {
                     //If the type is an IListContract<T> then call the IListContract<T> adapters
                     Type genericParamType = GetListGenericParamterType(pi.ParameterType);
-                    set.Right = CallListAdapter(SegmentDirection.ContractToView, componentType, viewType, new CodeVariableReferenceExpression(pi.Name), genericParamType);
+                    set.Right = CallListAdapter(SegmentDirection.ContractToView, componentType, viewType,  new CodePropertySetValueReferenceExpression(), genericParamType);
                 }
                 else
                 {
                     //If this is a standard custom contract call the appropriate static adapter
-                    set.Right = CallStaticAdapter(componentType, pi.ParameterType, new CodeVariableReferenceExpression(pi.Name), SegmentDirection.ContractToView);
+                    set.Right = CallStaticAdapter(componentType, pi.ParameterType, new CodePropertySetValueReferenceExpression(), SegmentDirection.ContractToView);
                 }
                 return set;
             }
@@ -1343,7 +1351,6 @@ namespace PipelineBuilder
             {
                 CodeExpression value = null;
                 ParameterInfo pi = mi.GetParameters()[0];
-                CodeVariableReferenceExpression param = new CodeVariableReferenceExpression("value");
                 if (method != null)
                 {
                     method.Parameters.Add(new CodeParameterDeclarationExpression(pi.ParameterType, pi.Name));
@@ -1351,18 +1358,18 @@ namespace PipelineBuilder
                 if (!TypeNeedsAdapting(pi.ParameterType))
                 {
                     //If the type doesn't need adapting just asign it directly
-                    value = param;
+                    value = new CodePropertySetValueReferenceExpression();
                 }
                 else if (IsIListContract(pi.ParameterType))
                 {
                     //If the type is an IListContract<T> then call the IListContract<T> adapters
                     Type genericParamType = GetListGenericParamterType(pi.ParameterType);
-                    value = CallListAdapter(SegmentDirection.ViewToContract, componentType, viewType, param, genericParamType);
+                    value = CallListAdapter(SegmentDirection.ViewToContract, componentType, viewType, new CodePropertySetValueReferenceExpression(), genericParamType);
                 }
                 else
                 {
                     //If this is a standard custom contract call the appropriate static adapter
-                    value = CallStaticAdapter(componentType, pi.ParameterType,param, SegmentDirection.ViewToContract);
+                    value = CallStaticAdapter(componentType, pi.ParameterType, new CodePropertySetValueReferenceExpression(), SegmentDirection.ViewToContract);
                 }
                 if (IsProperty(mi))
                 {
@@ -1552,7 +1559,7 @@ namespace PipelineBuilder
                         //Hook up event during constructor
                         ParameterInfo pi = mi.GetParameters()[0];
                         CodeTypeReference adapterType =
-                            new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ViewToContract, false));
+                            new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ViewToContract, contractType));
                         CodeObjectCreateExpression adapter = new CodeObjectCreateExpression(adapterType, new CodeThisReferenceExpression(),new CodeVariableReferenceExpression("s_" + mi.Name + "Fire"));
                         CodeMemberField handlerField = new CodeMemberField();
                         handlerField.Name = attr.Name + "_Handler";
@@ -1564,12 +1571,6 @@ namespace PipelineBuilder
                         constructor.Statements.Add(assignHandlerField);
 
 
-                        //cmi = new CodeMethodInvokeExpression();
-                        //cmi.Method = new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_contract"), mi.Name);
-                        //cmi.Parameters.Add(adapter);
-                        //constructor.Statements.Add(cmi);
-                        
-                        
                         //Add field
                         CodeMemberEvent eventField = new CodeMemberEvent();
                         eventField.Name = "_" + attr.Name;
