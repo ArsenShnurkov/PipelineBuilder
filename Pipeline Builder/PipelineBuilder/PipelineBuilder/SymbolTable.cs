@@ -40,7 +40,7 @@ namespace PipelineBuilder
                 }
             }
             String contractNamespace = contractType.FullName.Remove(contractType.FullName.LastIndexOf("."));
-            if (contractNamespace.EndsWith(".Contracts") || contractNamespace.EndsWith(".Contracts"))
+            if (contractNamespace.EndsWith(".Contracts") || contractNamespace.EndsWith(".Contract"))
             {
                 string viewNamespace = contractNamespace.Remove(contractNamespace.LastIndexOf("."));
                 if (!(component.Equals(SegmentType.ASA) || component.Equals(SegmentType.HSA)))
@@ -55,7 +55,7 @@ namespace PipelineBuilder
                 {
                     return viewNamespace + ".HostSideAdapters";
                 }
-            }
+            } 
             
             return _namespaceMapping[component];
         }

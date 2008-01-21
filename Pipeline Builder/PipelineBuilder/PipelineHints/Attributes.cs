@@ -57,10 +57,10 @@ namespace PipelineHints
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum, AllowMultiple = true)]
     public class NamespaceAttribute : Attribute
     {
-        public NamespaceAttribute(String name, PipelineSegment segment)
+        public NamespaceAttribute(PipelineSegment segment,String name)
         {
             _segment = segment;
             _name = name;
