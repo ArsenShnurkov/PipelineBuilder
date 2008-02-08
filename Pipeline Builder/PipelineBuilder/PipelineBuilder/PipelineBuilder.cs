@@ -155,11 +155,95 @@ namespace PipelineBuilder
                     BuildEnumView(t, _view, SegmentType.VIEW);
                     BuildStaticAdapters(t, _hsa, SegmentType.HSA);
                     BuildStaticAdapters(t, _asa, SegmentType.ASA);
+                    BuildStaticAdapters(t.MakeArrayType(), _hsa, SegmentType.HSA);
+                    BuildStaticAdapters(t.MakeArrayType(), _asa, SegmentType.ASA);
+                }
+                else if (t.IsValueType)
+                {
+                    ValidateStructContract(t);
+                    PipelineHints.PipelineSegment customSettings = PipelineHints.PipelineSegment.None;
+                    if (t.GetCustomAttributes(typeof(PipelineHints.CustomPipelineAttribute), false).Length > 0)
+                    {
+                        customSettings = ((PipelineHints.CustomPipelineAttribute)t.GetCustomAttributes(typeof(PipelineHints.CustomPipelineAttribute), false)[0]).Segment;
+                    }
+                    //Build host, add-in views, and shared views
+                    if ((customSettings & PipelineHints.PipelineSegment.AddInView) != PipelineHints.PipelineSegment.AddInView)
+                    {
+                        BuildStructView(t, _aib, SegmentType.AIB);
+                    }
+                    if ((customSettings & PipelineHints.PipelineSegment.HostView) != PipelineHints.PipelineSegment.HostView)
+                    {
+                        BuildStructView(t, _hav, SegmentType.HAV);
+                    }
+                    if ((customSettings & PipelineHints.PipelineSegment.Views) != PipelineHints.PipelineSegment.Views)
+                    {
+                        BuildStructView(t, _view, SegmentType.VIEW);
+                    }
+                    Type arrayVersion = t.MakeArrayType();
+                    //Build add-in side adapters
+                    if ((customSettings & PipelineHints.PipelineSegment.AddInSideAdapter) != PipelineHints.PipelineSegment.AddInSideAdapter)
+                    {
+                        BuildStaticAdapters(t, _asa, SegmentType.ASA);
+                        
+                    }
+                    BuildStaticAdapters(arrayVersion, _asa, SegmentType.ASA);
+                    //Build host side adapters
+                    if ((customSettings & PipelineHints.PipelineSegment.HostSideAdapter) != PipelineHints.PipelineSegment.HostSideAdapter)
+                    {
+                        BuildStaticAdapters(t, _hsa, SegmentType.HSA);
+                    }
+                    BuildStaticAdapters(arrayVersion, _hsa, SegmentType.HSA);
+                  
                 }
             }
             return components;
         }
 
+
+        private void ValidateStructContract(Type t)
+        {
+            if (t.GetConstructors().Length != 1)
+            {
+                throw new InvalidOperationException("Struct contracts must have exactly one constructor: " + t.FullName);
+            }
+            if ((t.Attributes & TypeAttributes.Serializable) != TypeAttributes.Serializable)
+            {
+                throw new InvalidOperationException("Struct contracts must be marked with the SerializableAttribute: " + t.FullName);
+            }
+            if (t.GetConstructors()[0].GetParameters().Length != t.GetProperties().Length)
+            {
+                throw new InvalidOperationException("Struct contracts must have matching properties and constructor parameters:" + t.FullName);
+            }
+            foreach (PropertyInfo pi in t.GetProperties())
+            {
+                if (pi.GetGetMethod() == null)
+                {
+                    throw new InvalidOperationException("Stuct contracts must  have 'get' accessors for each property: " + t.FullName + "." + pi.Name);
+                }
+                ConstructorInfo ci = t.GetConstructors()[0];
+                bool foundMatch = false;
+                foreach (ParameterInfo param in ci.GetParameters())
+                {
+                    if (ConvertParamNameToProperty(param.Name).Equals(pi.Name))
+                    {
+                        if (param.ParameterType.Equals(pi.PropertyType))
+                        {
+                            foundMatch = true;
+                            break;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Struct contracts constructor param names and types must correspond to a property: " + t.FullName + "," + param.Name); 
+                        }
+                    }
+                }
+                if (!foundMatch)
+                {
+                    throw new InvalidOperationException("Struct contracts  property names and types must correspond to a constructor parameter: " + t.FullName + "," + pi.Name); 
+                }
+            }
+            
+        }
         private bool ShouldShareViews()
         {
             return _contractAsm.GetCustomAttributes(typeof(PipelineHints.ShareViews), false).Length > 0;
@@ -219,13 +303,171 @@ namespace PipelineBuilder
                 }
             }
             if (contractType.GetCustomAttributes(typeof(FlagsAttribute), false).Length > 0)
-            {
+            { 
                 type.CustomAttributes.Add(new CodeAttributeDeclaration("System.Flags"));
             }
             codeNamespace.Types.Add(type);
             ccu.Namespaces.Add(codeNamespace);
             component.Files.Add(new SourceFile(type.Name, ccu));
         }
+
+        internal void BuildStructView(Type contractType, PipelineSegmentSource component, SegmentType viewType)
+        {
+            CodeCompileUnit ccu = new CodeCompileUnit();
+            CodeNamespace codeNamespace = new CodeNamespace(_symbols.GetNameSpace(viewType, contractType));
+            CodeTypeDeclaration type = new CodeTypeDeclaration(_symbols.GetNameFromType(contractType, viewType, SegmentDirection.None, false));
+            type.Attributes = MemberAttributes.Public;
+            type.IsStruct = true;
+            foreach (PropertyInfo pi in contractType.GetProperties())
+            {
+                CodeMemberProperty prop = new CodeMemberProperty();
+                prop.Attributes = MemberAttributes.Public | MemberAttributes.Final;
+                prop.Name = pi.Name;
+                prop.HasGet = true;
+                prop.HasSet = false;
+                prop.Type = GetViewTypeReference(viewType, pi.PropertyType, contractType);
+                prop.GetStatements.Add(
+                        new CodeMethodReturnStatement(
+                            new CodeVariableReferenceExpression(ConvertNameToField(pi.Name))));
+                if (pi.GetSetMethod() != null)
+                {
+                    prop.SetStatements.Add(
+                            new CodeAssignStatement(
+                                new CodeVariableReferenceExpression(ConvertNameToField(pi.Name)),
+                                new CodePropertySetValueReferenceExpression()));
+                }
+                type.Members.Add(prop);
+
+            }
+            CodeConstructor constructor = new CodeConstructor();
+            constructor.Attributes = MemberAttributes.Public;
+            foreach (ParameterInfo pi in contractType.GetConstructors()[0].GetParameters())
+            {
+                CodeParameterDeclarationExpression param = new CodeParameterDeclarationExpression();
+                param.Name = pi.Name;
+                param.Type = GetViewTypeReference(viewType, pi.ParameterType, contractType);
+                constructor.Parameters.Add(param);
+                CodeMemberField field = new CodeMemberField();
+                field.Name = ConvertNameToField(pi.Name);
+                field.Type = param.Type;
+                type.Members.Add(field);
+                constructor.Statements.Add(
+                    new CodeAssignStatement(
+                        new CodeVariableReferenceExpression(field.Name),
+                        new CodeVariableReferenceExpression(pi.Name)));
+               
+            }
+            type.Members.Add(constructor);
+
+
+            codeNamespace.Types.Add(type);
+            ccu.Namespaces.Add(codeNamespace);
+            component.Files.Add(new SourceFile(type.Name, ccu));
+        }
+
+        private CodeMemberMethod CreateStructContractToViewStaticAdapter(Type contractType, SegmentType componentType, CodeTypeReference viewType)
+        {
+            CodeMemberMethod result = CreateStructStaticAdapter(contractType, new CodeTypeReference(contractType), viewType, "contract",componentType,SegmentDirection.ContractToView);
+            result.Name = "ContractToViewAdapter";
+            return result;
+        }
+
+        private CodeMemberMethod CreateStructViewtoContractStaticAdapter(Type contractType, SegmentType componentType, CodeTypeReference viewType)
+        {
+            CodeMemberMethod result = CreateStructStaticAdapter(contractType, viewType, new CodeTypeReference(contractType), "view",componentType,SegmentDirection.ViewToContract);
+            result.Name = "ViewToContractAdapter";
+            return result;
+        }
+
+        private CodeMemberMethod CreateStructStaticAdapter(Type contractType, CodeTypeReference source, CodeTypeReference destination, String paramName,SegmentType segment,SegmentDirection direction)
+        {
+            CodeMemberMethod adapter = new CodeMemberMethod();
+            adapter.Attributes = MemberAttributes.Public | MemberAttributes.Static;
+            adapter.ReturnType = destination;
+            adapter.Parameters.Add(
+                new CodeParameterDeclarationExpression(source, paramName));
+            CodeObjectCreateExpression constructor = new CodeObjectCreateExpression();
+            constructor.CreateType = destination;
+            foreach (ParameterInfo pi in contractType.GetConstructors()[0].GetParameters())
+            {
+                CodePropertyReferenceExpression prop =
+                    new CodePropertyReferenceExpression(
+                        new CodeVariableReferenceExpression(paramName),
+                        ConvertParamNameToProperty(pi.Name));
+                if (!TypeNeedsAdapting(pi.ParameterType))
+                {
+
+                    constructor.Parameters.Add(prop);
+                }
+                else
+                {
+                    constructor.Parameters.Add(
+                        CallStaticAdapter(segment, pi.ParameterType, prop, direction));
+                }
+            }
+            adapter.Statements.Add(
+                new CodeMethodReturnStatement(constructor));
+            return adapter;
+        }
+
+        private CodeMemberMethod CreateArrayContractToViewStaticAdapter(Type contractType, SegmentType componentType, CodeTypeReference viewType)
+        {
+            CodeMemberMethod result = CreateArrayStaticAdapter(contractType, new CodeTypeReference(contractType), viewType, "contract", componentType,SegmentDirection.ContractToView);
+            result.Name = "ContractToViewAdapter";
+            return result;
+        }
+        private CodeMemberMethod CreateArrayViewToContractStaticAdapter(Type contractType, SegmentType componentType, CodeTypeReference viewType)
+        {
+            CodeMemberMethod result = CreateArrayStaticAdapter(contractType, viewType, new CodeTypeReference(contractType), "view", componentType, SegmentDirection.ViewToContract);
+            result.Name = "ViewToContractAdapter";
+            return result;
+        }
+
+
+        private CodeMemberMethod CreateArrayStaticAdapter(Type contractType, CodeTypeReference source, CodeTypeReference destination, String paramName, SegmentType segment, SegmentDirection direction)
+        {
+            CodeMemberMethod adapter = new CodeMemberMethod();
+            adapter.Attributes = MemberAttributes.Public | MemberAttributes.Static;
+            adapter.ReturnType = destination;
+            adapter.Parameters.Add(
+                new CodeParameterDeclarationExpression(source, paramName));
+            CodeVariableDeclarationStatement result = new CodeVariableDeclarationStatement(destination, "result");
+            CodeVariableReferenceExpression input = new CodeVariableReferenceExpression(paramName);
+            result.InitExpression = new CodeArrayCreateExpression(destination, new CodePropertyReferenceExpression(input, "Length"));
+            //for (int i = 0;i < paramName.Length;i = i + 1)
+            CodeIterationStatement init = new CodeIterationStatement();
+            init.InitStatement = new CodeVariableDeclarationStatement(typeof(int), "i", new CodePrimitiveExpression(0));
+            CodeVariableReferenceExpression i = new CodeVariableReferenceExpression("i");
+            init.IncrementStatement = new CodeAssignStatement(i,new CodeBinaryOperatorExpression(i,CodeBinaryOperatorType.Add,new CodePrimitiveExpression(1)));
+            init.TestExpression = new CodeBinaryOperatorExpression(i, CodeBinaryOperatorType.LessThan, new CodePropertyReferenceExpression(input, "Length"));
+            //result[i] = SourceAdapter.DirectionAdapter(input[i])
+            CodeAssignStatement valInit = new CodeAssignStatement();
+            valInit.Left = new CodeArrayIndexerExpression(new CodeVariableReferenceExpression("result"), i);
+            valInit.Right = CallStaticAdapter(segment, contractType.GetElementType(), new CodeArrayIndexerExpression(input, i), direction);
+            init.Statements.Add(valInit);
+            CodeMethodReturnStatement ret = new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result"));
+            adapter.Statements.Add(result);
+            adapter.Statements.Add(init);
+            adapter.Statements.Add(ret);
+            return adapter;
+        }
+
+        internal static String ConvertPropertyNametoParameter(String name)
+        {
+            return name[0].ToString().ToLower() + name.Substring(1);           
+        }
+
+        internal static String ConvertNameToField(String name)
+        {
+            return "_" + ConvertPropertyNametoParameter(name);
+        }
+
+       
+        internal static String ConvertParamNameToProperty(String name)
+        {
+            return name[0].ToString().ToUpper() + name.Substring(1);
+        }
+        
 
         internal static bool IsNativeHandle(Type t)
         {
@@ -260,6 +502,7 @@ namespace PipelineBuilder
             foreach (PipelineHints.CommentAttribute comment in typeComments)
             {
                 type.Comments.Add(new CodeCommentStatement(comment.Comment));
+                
             }
             if (IsViewInterface(contractType))
             {
@@ -351,7 +594,7 @@ namespace PipelineBuilder
                 method.Attributes = MemberAttributes.Abstract | MemberAttributes.Public;
                 method.Name = mi.Name;
                 //Setup the return type for this member in the view
-                method.ReturnType = GetMethodReturnTypeForView(componentType, mi);
+                method.ReturnType = GetViewTypeReference(componentType, mi.ReturnType,contractType);
                 //For each parameter in the method in the contract, add the right one to the view
                 AddParametersToViewMethod(componentType, mi, method);
                 object[] methodComments = mi.GetCustomAttributes(typeof(PipelineHints.CommentAttribute), false);
@@ -377,61 +620,37 @@ namespace PipelineBuilder
             //Iterate through each parameter on the type in the original contract method
             foreach (ParameterInfo pi in mi.GetParameters())
             {
-                //If the type doesn't need adapting just place it in the method, else we check to see why it needs adapting (is it a "known" type) and
-                //add a paramter of the appropriate type. 
-                if (!TypeNeedsAdapting(pi.ParameterType))
-                {
-                    CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(pi.ParameterType, pi.Name);
-                    method.Parameters.Add(cp);
-                }
-                else
-                {
-                    if (IsIListContract(pi.ParameterType))
-                    {
-                        CodeTypeReference paramType = GetIListContractTypeRef(componentType, SegmentDirection.None,  pi.ParameterType,mi.DeclaringType);
-                        method.Parameters.Add(new CodeParameterDeclarationExpression(paramType, pi.Name));
-                    }
-                    else if (IsNativeHandle(pi.ParameterType))
-                    {
-                        method.Parameters.Add(new CodeParameterDeclarationExpression(GetNativeHandleViewType(SegmentDirection.ContractToView), pi.Name));
-                    }
-                    else
-                    {
-                        CodeTypeReference paramType =
-                                new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.None, mi.DeclaringType));
-                        CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(paramType, pi.Name);
-                        method.Parameters.Add(cp);
-                    }
-
-                }
+                CodeTypeReference paramType = GetViewTypeReference(componentType, pi.ParameterType, mi.DeclaringType);
+                CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(paramType, pi.Name);
+                method.Parameters.Add(cp);
             }
         }
 
-        private CodeTypeReference GetMethodReturnTypeForView(SegmentType componentType, MethodInfo mi)
+      
+
+        private CodeTypeReference GetViewTypeReference(SegmentType componentType, Type contractType, Type declaringType)
         {
             //If the return value does not need adapting set the return value as the actual type. 
             //If it needs adapting but is not an IlistContract set the return value as the view type for the specified return value, 
             //otherwise set the return type as IList<TView> for the IListContract<TContract>
-            if (!TypeNeedsAdapting(mi.ReturnType))
+            if (!TypeNeedsAdapting(contractType))
             {
-                return new CodeTypeReference(mi.ReturnType);
+                return new CodeTypeReference(contractType);
             }
             else
             {
-                if (IsIListContract(mi.ReturnType))
+                if (IsIListContract(contractType))
                 {
-                    SegmentDirection direction = SegmentDirection.None;
-                    Type contractGenericType = mi.ReturnType;
-                    CodeTypeReference returnType = GetIListContractTypeRef(componentType, direction,  contractGenericType,mi.DeclaringType);
+                    CodeTypeReference returnType = GetIListContractTypeRef(componentType, SegmentDirection.None, contractType, declaringType);
                     return returnType;
                 }
-                else if (IsNativeHandle(mi.ReturnType))
+                else if (IsNativeHandle(contractType))
                 {
                     return GetNativeHandleViewType(SegmentDirection.ViewToContract);
                 }
                 else
                 {
-                    return new CodeTypeReference(_symbols.GetNameFromType(mi.ReturnType, componentType, SegmentDirection.None, mi.DeclaringType));
+                    return new CodeTypeReference(_symbols.GetNameFromType(contractType, componentType, SegmentDirection.None,declaringType));
                 }
 
 
@@ -464,7 +683,9 @@ namespace PipelineBuilder
         {
             return !((contractType.GetCustomAttributes(typeof(PipelineHints.AbstractBaseClass), false).Length > 0) ||
                       IsEventArgs(contractType) ||
-                      contractType.IsEnum);
+                      contractType.IsEnum ||
+                      contractType.IsValueType ||
+                      contractType.IsArray);
         }
 
 
@@ -539,7 +760,7 @@ namespace PipelineBuilder
                 Type propertyType = GetPropertyType(mi);
                 if (direction.Equals(SegmentDirection.ViewToContract))
                 {
-                    prop.Type = new CodeTypeReference(mi.ReturnType);
+                    prop.Type = new CodeTypeReference(propertyType);
                 }
                 else
                 {
@@ -785,6 +1006,8 @@ namespace PipelineBuilder
             component.Files.Add(new SourceFile(typeName, ccu));
         }
 
+       
+
         private CodeMemberMethod CreateContractToViewStaticAdapter(Type contractType, SegmentType componentType, CodeTypeReference viewType)
         {
             CodeMemberMethod cva = new CodeMemberMethod();
@@ -794,7 +1017,20 @@ namespace PipelineBuilder
             cva.ReturnType = viewType;
             CodeParameterDeclarationExpression contractParam = new CodeParameterDeclarationExpression(contractType, "contract");
             cva.Parameters.Add(contractParam);
-            if (!contractType.IsEnum)
+            if (contractType.IsArray)
+            {
+                return CreateArrayContractToViewStaticAdapter(contractType, componentType, viewType);
+            }
+            else if (contractType.IsEnum)
+            {
+                CodeCastExpression cce = new CodeCastExpression(viewType, new CodeVariableReferenceExpression("contract"));
+                cva.Statements.Add(new CodeMethodReturnStatement(cce));
+            }
+            else if (contractType.IsValueType)
+            {
+                return CreateStructContractToViewStaticAdapter(contractType, componentType, viewType);
+            }
+            else
             {
                 #region TryUpCast
                 List<Type> subTypes;
@@ -805,16 +1041,16 @@ namespace PipelineBuilder
                     foreach (Type t in subTypes)
                     {
                         CodeAssignStatement assign = new CodeAssignStatement();
-                        CodeMethodInvokeExpression queryContract = 
-                            new CodeMethodInvokeExpression(new CodeVariableReferenceExpression("contract"), 
-                                                           "QueryContract", 
+                        CodeMethodInvokeExpression queryContract =
+                            new CodeMethodInvokeExpression(new CodeVariableReferenceExpression("contract"),
+                                                           "QueryContract",
                                                            new CodePrimitiveExpression(t.FullName));
                         assign.Left = subContractRef;
                         assign.Right = queryContract;
                         CodeConditionStatement ifContractFound = new CodeConditionStatement();
-                        CodeBinaryOperatorExpression nullCheck = 
-                            new CodeBinaryOperatorExpression (subContractRef, 
-                                                             CodeBinaryOperatorType.IdentityInequality, 
+                        CodeBinaryOperatorExpression nullCheck =
+                            new CodeBinaryOperatorExpression(subContractRef,
+                                                             CodeBinaryOperatorType.IdentityInequality,
                                                              new CodePrimitiveExpression(null));
                         ifContractFound.Condition = nullCheck;
                         CodeCastExpression castContract = new CodeCastExpression(t, subContractRef);
@@ -823,7 +1059,7 @@ namespace PipelineBuilder
                         cva.Statements.Add(assign);
                         cva.Statements.Add(ifContractFound);
                     }
-                    
+
                 }
                 #endregion
 
@@ -850,16 +1086,12 @@ namespace PipelineBuilder
                 canUnwrap.Operator = CodeBinaryOperatorType.BooleanAnd;
                 canUnwrap.Right = equals;
                 canUnwrap.Left = new CodeBinaryOperatorExpression(isRemote, CodeBinaryOperatorType.IdentityInequality, new CodePrimitiveExpression(true));
-                
+
                 tryCast.Condition = canUnwrap;
 
                 cva.Statements.Add(tryCast);
             }
-            else
-            {
-                CodeCastExpression cce = new CodeCastExpression(viewType, new CodeVariableReferenceExpression("contract"));
-                cva.Statements.Add(new CodeMethodReturnStatement(cce));
-            }
+            
             return cva;
         }
 
@@ -872,12 +1104,19 @@ namespace PipelineBuilder
             vca.ReturnType = new CodeTypeReference(contractType);
             CodeParameterDeclarationExpression viewParam = new CodeParameterDeclarationExpression(viewType, "view");
             vca.Parameters.Add(viewParam);
-            if (contractType.IsEnum)
+            if (contractType.IsArray)
+            {
+                return CreateArrayViewToContractStaticAdapter(contractType, componentType, viewType);
+            }
+            else if (contractType.IsEnum)
             {
                 CodeCastExpression cce = new CodeCastExpression(contractType, new CodeVariableReferenceExpression("view"));
                 vca.Statements.Add(new CodeMethodReturnStatement(cce));
             }
-            
+            else if (contractType.IsValueType)
+            {
+                return CreateStructViewtoContractStaticAdapter(contractType, componentType, viewType);
+            }
             else
             {
                 String incomingAdapterName = _symbols.GetNameFromType(contractType, componentType, SegmentDirection.ContractToView, false);
@@ -1020,6 +1259,10 @@ namespace PipelineBuilder
                 //If event is not hooked up return false (don't cancel)
                 if (mi.ReturnType.Equals(typeof(bool)))
                 {
+                    if (!GetEventArgs(pi.ParameterType).Cancelable)
+                    {
+                        throw new InvalidOperationException("Event handler method returns a bool but the event args are not cancelable:"+mi.DeclaringType.FullName + "."+mi.Name);
+                    }
                     method.ReturnType = new CodeTypeReference(typeof(bool));
                     CodeFieldReferenceExpression cancel = new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("adaptedArgs"), "Cancel");
                     CodeMethodReturnStatement retCancelCheck = new CodeMethodReturnStatement(cancel);
@@ -1057,18 +1300,11 @@ namespace PipelineBuilder
                     else
                     {
                         method.ReturnType = new CodeTypeReference(mi.ReturnType);
-                        if (IsIListContract(mi.ReturnType))
-                        {
-                            //If the return type is an IListContract<T> call the method and pass its result to the adapters for IListContract<T>
-                            Type genericParam = GetListGenericParamterType(mi.ReturnType);
-                            ret.Expression = CallListAdapter(SegmentDirection.ViewToContract, componentType, viewType, cmi, genericParam);
-                        }
-                        else
-                        {
+                        
                             //If the return type needs adapting call method, pass its return value to the static adapter, and then return that
-                            CodeMethodInvokeExpression adaptExpr = CallStaticAdapter(componentType, mi.ReturnType, cmi, SegmentDirection.ViewToContract);
-                            ret.Expression = adaptExpr;
-                        }
+                        CodeMethodInvokeExpression adaptExpr = CallStaticAdapter(componentType, mi.ReturnType, cmi, SegmentDirection.ViewToContract);
+                        ret.Expression = adaptExpr;
+                     
 
                     }
                     if (IsProperty(mi))
@@ -1207,18 +1443,10 @@ namespace PipelineBuilder
 
                                 CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(pi.ParameterType, pi.Name);
                                 method.Parameters.Add(cp);
-                                CodeMethodInvokeExpression adapterExpr = null;
-                                if (!IsIListContract(pi.ParameterType))
-                                {
-                                    adapterExpr =
-                                        CallStaticAdapter(componentType, pi.ParameterType, new CodeVariableReferenceExpression(pi.Name), SegmentDirection.ContractToView);
+                                CodeMethodInvokeExpression adapterExpr =
+                                    CallStaticAdapter(componentType, pi.ParameterType, new CodeVariableReferenceExpression(pi.Name), SegmentDirection.ContractToView);
 
-                                }
-                                else
-                                {
-                                    Type genericParamType = GetListGenericParamterType(pi.ParameterType);
-                                    adapterExpr = CallListAdapter(SegmentDirection.ContractToView, componentType, viewType, new CodeVariableReferenceExpression(pi.Name), genericParamType);
-                                }
+                              
                                 cmi.Parameters.Add(adapterExpr);
                             }
                         }
@@ -1269,15 +1497,8 @@ namespace PipelineBuilder
                     //If the type does not need adapting just pass the return value directly
                     ret.Expression = prop;
                 }
-                else if (IsIListContract(mi.ReturnType))
-                {
-                    //If this is an IListContract call the IListContract adapters
-                    Type genericParamType = GetListGenericParamterType(mi.ReturnType);
-                    ret.Expression = CallListAdapter(SegmentDirection.ViewToContract, componentType, viewType, prop, genericParamType);
-                }
                 else
                 {
-                    //If this is a standard custom contract call the appropriate static adapter
                     ret.Expression = CallStaticAdapter(componentType, mi.ReturnType, prop, SegmentDirection.ViewToContract);
                 }
 
@@ -1296,12 +1517,6 @@ namespace PipelineBuilder
                 {
                     //If the type doesn't need adapting just asign it directly
                     set.Right = new CodePropertySetValueReferenceExpression();
-                }
-                else if (IsIListContract(pi.ParameterType))
-                {
-                    //If the type is an IListContract<T> then call the IListContract<T> adapters
-                    Type genericParamType = GetListGenericParamterType(pi.ParameterType);
-                    set.Right = CallListAdapter(SegmentDirection.ContractToView, componentType, viewType,  new CodePropertySetValueReferenceExpression(), genericParamType);
                 }
                 else
                 {
@@ -1333,12 +1548,6 @@ namespace PipelineBuilder
                     //If the type does not need adapting just pass the return value directly
                     ret.Expression = prop;
                 }
-                else if (IsIListContract(mi.ReturnType))
-                {
-                    //If this is an IListContract call the IListContract adapters
-                    Type genericParamType = GetListGenericParamterType(mi.ReturnType);
-                    ret.Expression = CallListAdapter(SegmentDirection.ContractToView, componentType, viewType, prop, genericParamType);
-                }
                 else
                 {
                     //If this is a standard custom contract call the appropriate static adapter
@@ -1359,12 +1568,6 @@ namespace PipelineBuilder
                 {
                     //If the type doesn't need adapting just asign it directly
                     value = new CodePropertySetValueReferenceExpression();
-                }
-                else if (IsIListContract(pi.ParameterType))
-                {
-                    //If the type is an IListContract<T> then call the IListContract<T> adapters
-                    Type genericParamType = GetListGenericParamterType(pi.ParameterType);
-                    value = CallListAdapter(SegmentDirection.ViewToContract, componentType, viewType, new CodePropertySetValueReferenceExpression(), genericParamType);
                 }
                 else
                 {
@@ -1444,9 +1647,20 @@ namespace PipelineBuilder
             return adapterExpr;
         }
 
-        internal static bool TypeNeedsAdapting(Type contractType)
+        internal bool TypeNeedsAdapting(Type contractType)
         {
-            return typeof(IContract).IsAssignableFrom(contractType) | contractType.IsEnum;
+            if (!contractType.IsArray)
+            {
+                return contractType.Assembly.Equals(this._contractAsm) || typeof(IContract).IsAssignableFrom(contractType);
+            }
+            else
+            {
+                if (!contractType.GetElementType().IsValueType)
+                {
+                    throw new InvalidOperationException("Only arrays of value types are supported. For collections of reference types (types deriving from IContract, use IListContract<T> instead");
+                }
+                return TypeNeedsAdapting(contractType.GetElementType());
+            }
         }
 
         internal void BuildContractToViewAdapter(Type contractType, PipelineSegmentSource component, SegmentType componentType, bool activatable)
@@ -1517,7 +1731,7 @@ namespace PipelineBuilder
                 handler.ReturnType = new CodeTypeReference(typeof(void));
                 CodeMethodInvokeExpression cmi = new CodeMethodInvokeExpression();
                 if (TypeNeedsAdapting(pi.ParameterType))
-                {   
+                {
                     CodeMethodInvokeExpression argsAdapter = CallStaticAdapter(componentType, pi.ParameterType, new CodeVariableReferenceExpression("args"), SegmentDirection.ViewToContract);
                     cmi.Parameters.Add(argsAdapter);
                 }
@@ -1636,27 +1850,8 @@ namespace PipelineBuilder
                     }
                     else
                     {
-                        if (IsIListContract(mi.ReturnType))
-                        {
-                            Type genericParamType = GetListGenericParamterType(mi.ReturnType);
-                            method.ReturnType = GetIListContractTypeRef(viewType, SegmentDirection.ContractToView,  mi.ReturnType,mi.DeclaringType);
-                            ret.Expression = CallListAdapter(SegmentDirection.ContractToView, componentType, viewType, cmi, genericParamType);
-                        }
-                        else
-                        {
-                            if (IsNativeHandle(mi.ReturnType))
-                            {
-                                method.ReturnType = GetNativeHandleViewType(SegmentDirection.ViewToContract);
-                            }
-                            else
-                            {
-                                method.ReturnType = new CodeTypeReference(_symbols.GetNameFromType(mi.ReturnType, viewComponentType, SegmentDirection.ContractToView));
-
-                            }
-                            CodeMethodInvokeExpression adaptExpr = CallStaticAdapter(componentType, mi.ReturnType, cmi, SegmentDirection.ContractToView);
-                            ret.Expression = adaptExpr;
-                        }
-                        
+                        method.ReturnType = GetViewTypeReference(viewType, mi.ReturnType, mi.DeclaringType);
+                        ret.Expression = CallStaticAdapter(componentType, mi.ReturnType, cmi, SegmentDirection.ContractToView);
                     }
                     foreach (ParameterInfo pi in mi.GetParameters())
                     {
@@ -1668,30 +1863,9 @@ namespace PipelineBuilder
                         }
                         else
                         {
-                            CodeMethodInvokeExpression adaptExpr ;
-                            if (IsIListContract(pi.ParameterType))
-                            {
-                                CodeTypeReference paramType = GetIListContractTypeRef(viewComponentType, SegmentDirection.ContractToView,  pi.ParameterType,mi.DeclaringType);
-                                method.Parameters.Add(new CodeParameterDeclarationExpression(paramType, pi.Name));
-                                Type genericParamType = GetListGenericParamterType(pi.ParameterType);
-                                adaptExpr = CallListAdapter(SegmentDirection.ViewToContract, componentType, viewType, new CodeVariableReferenceExpression(pi.Name), genericParamType);
-                            }
-                            else
-                            {
-                                CodeTypeReference paramType ;
-                                if (IsNativeHandle(pi.ParameterType))
-                                {
-                                    paramType = GetNativeHandleViewType(SegmentDirection.ContractToView);
-                                }
-                                else
-                                {
-                                    paramType = new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, viewComponentType, SegmentDirection.None, true));
-                                }
-                                CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(paramType, pi.Name);
-                                method.Parameters.Add(cp);
-                                adaptExpr = CallStaticAdapter(componentType, pi.ParameterType, new CodeVariableReferenceExpression(pi.Name), SegmentDirection.ViewToContract);
-                            }
-                           
+                            CodeTypeReference paramType = GetViewTypeReference(viewComponentType, pi.ParameterType, mi.DeclaringType);
+                            CodeMethodInvokeExpression adaptExpr = CallStaticAdapter(componentType, pi.ParameterType, new CodeVariableReferenceExpression(pi.Name), SegmentDirection.ViewToContract);
+                            method.Parameters.Add(new CodeParameterDeclarationExpression(paramType, pi.Name));
                             cmi.Parameters.Add(adaptExpr);
                         }
                     }
@@ -1763,22 +1937,22 @@ namespace PipelineBuilder
             {
                 throw new InvalidOperationException("Can not find matching unsubscribe method");
             }
-
-            String snippetText = "\t\tpublic event System.EventHandler<{0}>{4}{{\n\t\t\t";
-            snippetText += "add{{\n\t\t\t\t";
-            snippetText += "if ({2} == null)\n\t\t\t";
-            snippetText += "{{\n\t\t\t\t";
-            snippetText += "_contract.{1}({4}_Handler);\n\t\t\t";
-            snippetText += "}}\n\t\t\t";
-            snippetText += "{2} += value;\n\t\t\t";
-            snippetText += "}}\n\t\t\t";
-            snippetText += "remove{{\n\t\t\t\t";
-            snippetText += "{2} -= value;\n\t\t\t";
-            snippetText += "if ({2} == null)\n\t\t\t";
-            snippetText += "{{\n\t\t\t\t";
-            snippetText += "_contract.{3}({4}_Handler);\n\t\t\t";
-            snippetText += "}}\n\t\t\t";
-            snippetText += "}}\n\t\t}}";
+            String nl = Environment.NewLine;
+            String snippetText = "\t\tpublic event System.EventHandler<{0}>{4}{{"+nl+"\t\t\t";
+            snippetText += "add{{"+nl+"\t\t\t\t";
+            snippetText += "if ({2} == null)"+nl+"\t\t\t\t";
+            snippetText += "{{"+nl+"\t\t\t\t\t";
+            snippetText += "_contract.{1}({4}_Handler);"+nl+"\t\t\t\t";
+            snippetText += "}}"+nl+"\t\t\t\t";
+            snippetText += "{2} += value;"+nl+"\t\t\t\t";
+            snippetText += "}}"+nl+"\t\t\t";
+            snippetText += "remove{{" + nl + "\t\t\t\t\t";
+            snippetText += "{2} -= value;" + nl + "\t\t\t\t";
+            snippetText += "if ({2} == null)" + nl + "\t\t\t\t";
+            snippetText += "{{" + nl + "\t\t\t\t\t";
+            snippetText += "_contract.{3}({4}_Handler);" + nl + "\t\t\t\t";
+            snippetText += "}}" + nl + "\t\t\t\t";
+            snippetText += "}}" + nl + "\t\t}}";
             snippetText = String.Format(snippetText, eventField.Type.UserData["eventArgsTypeName"], mi.Name, eventField.Name,rMi.Name,attr.Name);
             CodeSnippetTypeMember snippet = new CodeSnippetTypeMember(snippetText);
             return snippet;
@@ -1836,8 +2010,20 @@ namespace PipelineBuilder
             type.Members.Add(disposed);
         }
 
-        private CodeMethodInvokeExpression CallStaticAdapter(SegmentType componentType, Type contractType, CodeExpression cmi, SegmentDirection direction)
+        private CodeMethodInvokeExpression CallStaticAdapter(SegmentType componentType, Type contractType, CodeExpression obj, SegmentDirection direction)
         {
+            SegmentType viewType = SegmentType.VIEW;
+            if (!ShouldShareViews())
+            {
+                if (componentType.Equals(SegmentType.HSA))
+                {
+                    viewType = SegmentType.HAV;
+                }
+                else
+                {
+                    viewType = SegmentType.AIB;
+                }
+            }
             if (IsNativeHandle(contractType))
             {
                 CodeMethodInvokeExpression adapterInvoke = new CodeMethodInvokeExpression();
@@ -1846,16 +2032,21 @@ namespace PipelineBuilder
                     adapterInvoke.Method = new CodeMethodReferenceExpression();
                     adapterInvoke.Method.MethodName = "ContractToViewAdapter";
                     adapterInvoke.Method.TargetObject = new CodeVariableReferenceExpression("System.AddIn.Pipeline.FrameworkElementAdapters");
-                    adapterInvoke.Parameters.Add(cmi);
+                    adapterInvoke.Parameters.Add(obj);
                 }
                 else
                 {
                     adapterInvoke.Method = new CodeMethodReferenceExpression();
                     adapterInvoke.Method.MethodName = "ViewToContractAdapter";
                     adapterInvoke.Method.TargetObject = new CodeVariableReferenceExpression("System.AddIn.Pipeline.FrameworkElementAdapters");
-                    adapterInvoke.Parameters.Add(cmi);
+                    adapterInvoke.Parameters.Add(obj);
                 }
                 return adapterInvoke;
+            }
+            else if (IsIListContract(contractType))
+            {
+                Type genericParam = GetListGenericParamterType(contractType);
+                return CallListAdapter(direction, componentType, viewType, obj, genericParam);
             }
             else
             {
@@ -1864,11 +2055,12 @@ namespace PipelineBuilder
                 String adapterMethodName = _symbols.GetStaticAdapterMethodNameName(contractType, componentType, direction);
                 CodeMethodReferenceExpression adaptMethod = new CodeMethodReferenceExpression(adapterType, adapterMethodName);
                 adaptExpr.Method = adaptMethod;
-                adaptExpr.Parameters.Add(cmi);
+                adaptExpr.Parameters.Add(obj);
                 return adaptExpr;
             }
         }
 
+       
         private CodeMethodReferenceExpression GetStaticAdapter(SegmentType componentType, Type contractType, SegmentDirection direction)
         {      
             CodeTypeReferenceExpression adapterType = new CodeTypeReferenceExpression(_symbols.GetNameFromType(contractType, componentType, SegmentDirection.None, true));

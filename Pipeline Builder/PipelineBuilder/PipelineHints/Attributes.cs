@@ -38,7 +38,7 @@ namespace PipelineHints
     public class ShareViews : Attribute{}
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property | AttributeTargets.Struct)]
     public class CommentAttribute : Attribute
     {
         public CommentAttribute(String comment)
@@ -57,7 +57,7 @@ namespace PipelineHints
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Struct, AllowMultiple = true)]
     public class NamespaceAttribute : Attribute
     {
         public NamespaceAttribute(PipelineSegment segment,String name)
@@ -172,7 +172,7 @@ namespace PipelineHints
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Interface)]
+    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Struct)]
     public class CustomPipelineAttribute : Attribute
     {
         PipelineSegment _segment;

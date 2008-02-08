@@ -9,28 +9,26 @@ namespace PipelineBuilder
     public class SymbolTable
     {
         String _rootName;
+        Assembly _rootAssembly;
         bool _sharedView = false;
-        Dictionary<SegmentType, String> _namespaceMapping;
         Dictionary<SegmentType, String> _assemblyNameMapping;
        
         internal SymbolTable(Assembly root)
         {
-            _namespaceMapping = new Dictionary<SegmentType, string>();
+            _rootAssembly = root;
             _assemblyNameMapping = new Dictionary<SegmentType, string>();
             _sharedView = root.GetCustomAttributes(typeof(PipelineHints.ShareViews), false).Length > 0;
             _rootName = root.GetName().Name;
             InitAssemblyNames(root);
-            InitNamespace(root);
-            
         }
 
-        internal string GetRootNameSpace(SegmentType component)
-        {
-            return _namespaceMapping[component];
-        }
-
+    
         internal string GetNameSpace(SegmentType component, Type contractType)
         {
+            if (contractType.IsArray)
+            {
+                contractType = contractType.GetElementType();
+            }
             object[] namespaceAttributes = contractType.GetCustomAttributes(typeof(PipelineHints.NamespaceAttribute), false);
             foreach (PipelineHints.NamespaceAttribute attr in namespaceAttributes)
             {
@@ -55,9 +53,27 @@ namespace PipelineBuilder
                 {
                     return viewNamespace + ".HostSideAdapters";
                 }
-            } 
+            }
+            else
+            {
+                switch (component)
+                {
+                    case SegmentType.AIB:
+                        return contractNamespace + ".AddInViews";
+                    case SegmentType.ASA:
+                        return contractNamespace + ".AddInSideAdapters";
+                    case SegmentType.HAV:
+                        return contractNamespace + ".HostViews";
+                    case SegmentType.HSA:
+                        return contractNamespace + ".HostSideAdapters";
+                    case SegmentType.VIEW:
+                        return contractNamespace + ".Views";
+                    default:
+                        throw new InvalidOperationException("Component is not a valid type: " + component + "/" + contractType.FullName);
+                }
+            }
+            throw new InvalidOperationException("Component is not a valid type: " + component + "/" + contractType.FullName);
             
-            return _namespaceMapping[component];
         }
 
         internal static bool ComponentsAreEquivalent(SegmentType component, PipelineHints.PipelineSegment pipelineHints)
@@ -124,57 +140,18 @@ namespace PipelineBuilder
             return _assemblyNameMapping[component];
         }
 
-        internal void InitNamespace(Assembly asm)
-        {
-            String contractAssemblyName = _rootName;
-            if (contractAssemblyName.EndsWith(".Contracts") || contractAssemblyName.EndsWith(".Contract"))
-            {
-                contractAssemblyName = contractAssemblyName.Remove(contractAssemblyName.LastIndexOf("."));
-            }
-            else if (contractAssemblyName.EndsWith("Contracts") || contractAssemblyName.EndsWith("Contracts"))
-            {
-                contractAssemblyName = contractAssemblyName.Remove(contractAssemblyName.LastIndexOf("Contract"));
-            }
-            _namespaceMapping[SegmentType.HAV] = contractAssemblyName;
-            _namespaceMapping[SegmentType.HSA]=  contractAssemblyName + "HostAdapers";
-            _namespaceMapping[SegmentType.ASA] = contractAssemblyName + "AddInAdapters";
-            _namespaceMapping[SegmentType.AIB] = contractAssemblyName;
-            _namespaceMapping[SegmentType.VIEW] = contractAssemblyName;
-            foreach (PipelineHints.NamespaceAttribute attr in asm.GetCustomAttributes(typeof(PipelineHints.NamespaceAttribute), false))
-            {
-                if (attr.Segment.Equals(PipelineHints.PipelineSegment.HostView))
-                {
-                    _namespaceMapping[SegmentType.HAV] = attr.Name;
-                }
-                if (attr.Segment.Equals(PipelineHints.PipelineSegment.AddInView))
-                {
-                    _namespaceMapping[SegmentType.AIB] = attr.Name;
-                }
-                if (attr.Segment.Equals(PipelineHints.PipelineSegment.AddInSideAdapter))
-                {
-                    _namespaceMapping[SegmentType.ASA] = attr.Name;
-                }
-                if (attr.Segment.Equals(PipelineHints.PipelineSegment.HostSideAdapter))
-                {
-                    _namespaceMapping[SegmentType.HSA] = attr.Name;
-                }
-                if (attr.Segment.Equals(PipelineHints.PipelineSegment.Views))
-                {
-                    _namespaceMapping[SegmentType.VIEW] = attr.Name;
-                }
-            }
+      
 
-           
-        }
-
-        private string NormalizeContractName(String name)
+        private string NormalizeContractName(Type contract)
         {
-            String result = name;
+            String name = contract.Name;
+            String result = contract.Name;
+            result = result.Replace("[]", "");
             if (name.Equals("IContract"))
             {
                 return name;
             }
-            if (result.StartsWith("I"))
+            if (result.StartsWith("I") && contract.IsInterface)
             {
                 result = result.Substring(1);
             }
@@ -223,9 +200,14 @@ namespace PipelineBuilder
 
         internal string GetNameFromType(Type type, SegmentType segmentType,SegmentDirection direction, bool prefix)
         {
-            if (!PipelineBuilder.TypeNeedsAdapting(type))
+            Type underlyingType;
+            if (type.IsArray)
             {
-                return type.FullName;
+                underlyingType = type.GetElementType();
+            }
+            else
+            {
+                underlyingType = type;
             }
             if (type.Equals(typeof(System.AddIn.Contract.INativeHandleContract)))
             {
@@ -238,6 +220,10 @@ namespace PipelineBuilder
                     return typeof(System.AddIn.Pipeline.FrameworkElementAdapters).FullName;
                 }
             }
+            if (!type.Assembly.Equals(this._rootAssembly)) 
+            {
+                return type.FullName;
+            }
             
             String refPrefix = "";
             String refSuffix = "";
@@ -249,7 +235,7 @@ namespace PipelineBuilder
             {
                 refSuffix = "ViewToContract";
             }
-            String typeName = NormalizeContractName(type.Name);
+            String typeName = NormalizeContractName(type);
             if (PipelineBuilder.IsViewInterface(type))
             {
                 typeName = "I" + typeName;
@@ -258,14 +244,25 @@ namespace PipelineBuilder
             {
                 if (_sharedView && (segmentType.Equals(SegmentType.HAV) || segmentType.Equals(SegmentType.AIB) || segmentType.Equals(SegmentType.VIEW)))
                 {
-                    refPrefix = GetNameSpace(SegmentType.VIEW,type) + ".";
+                    refPrefix = GetNameSpace(SegmentType.VIEW,underlyingType) + ".";
                 }
                 else
                 {
-                    refPrefix = GetNameSpace(segmentType,type) + ".";
+                    refPrefix = GetNameSpace(segmentType, underlyingType) + ".";
                 }
             }
-            switch (segmentType)
+            if (type.IsArray)
+            {
+                if (segmentType.Equals(SegmentType.ASA) || segmentType.Equals(SegmentType.HSA))
+                {
+                    typeName += "Array";
+                }
+                else
+                {
+                    typeName += "[]";
+                }
+            }
+            switch (segmentType) 
             {
                 case SegmentType.HAV:
                     return refPrefix + typeName;

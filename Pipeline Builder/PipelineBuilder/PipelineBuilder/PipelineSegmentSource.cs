@@ -9,12 +9,8 @@ namespace PipelineBuilder
     public class PipelineSegmentSource
     {
         SegmentType _type;
-        string _rootNamespace;
-       
-        public string Namespace
-        {
-            get { return _rootNamespace; }
-        }
+        
+        
 
         public SegmentType Type
         {
@@ -37,7 +33,6 @@ namespace PipelineBuilder
         {
             _type = type;
             _name = symbols.GetAssemblyName(type);
-            _rootNamespace = symbols.GetRootNameSpace(type);
             _files = new List<SourceFile>();
         }
     }

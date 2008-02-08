@@ -30,6 +30,11 @@ namespace VSPipelineBuilder
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
             dialog.ShowNewFolderButton = true;
+            string currentPath = System.IO.Path.GetFullPath(t_sourceOutput.Text);
+            if (System.IO.Directory.Exists(currentPath))
+            {
+                dialog.SelectedPath = currentPath;
+            }
             if (dialog.ShowDialog().Equals(DialogResult.OK))
             {
                 t_sourceOutput.Text = dialog.SelectedPath;
@@ -41,6 +46,13 @@ namespace VSPipelineBuilder
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
             dialog.ShowNewFolderButton = true;
+            Project contractProject = SourceProject;
+            string currentPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(Pop(contractProject.FileName), t_binaryOutput.Text));
+            if (System.IO.Directory.Exists(currentPath))
+            {
+                dialog.SelectedPath = currentPath;
+            }
+            
             if (dialog.ShowDialog().Equals(DialogResult.OK))
             {
                 t_binaryOutput.Text = dialog.SelectedPath;
@@ -53,8 +65,9 @@ namespace VSPipelineBuilder
             t_binaryOutput.Text = "";
             t_sourceOutput.Text = "";
             Project contractProject = null;
-            foreach (Project project in root.Solution.Projects)
+            foreach (Project project in Connect.GetProjectsFromSolution(root))
             {
+               
                 c_projects.Items.Add(project.Name);
                 if (project.Name.Contains("Contracts"))
                 {
@@ -78,6 +91,8 @@ namespace VSPipelineBuilder
             }
         }
 
+       
+
         private void InitializeProject(Project p)
         {
             t_sourceOutput.Text = Pop(_root.Solution.FileName);
@@ -90,7 +105,7 @@ namespace VSPipelineBuilder
             {
                 if (!String.IsNullOrEmpty(c_projects.SelectedItem.ToString()))
                 {
-                    foreach (Project project in _root.Solution.Projects)
+                    foreach (Project project in Connect.GetProjectsFromSolution(_root))
                     {
                         if (project.Name.Equals(c_projects.SelectedItem.ToString()))
                         {

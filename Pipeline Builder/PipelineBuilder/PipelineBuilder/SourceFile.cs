@@ -43,7 +43,7 @@ namespace PipelineBuilder
         {
             if (Generated)
             {
-                _name = name + ".generated.cs";
+                _name = name + ".g.cs";
             }
             else
             {
@@ -58,13 +58,16 @@ namespace PipelineBuilder
             CSharpCodeProvider cscp = new CSharpCodeProvider();
             StringBuilder sb = new StringBuilder();
             System.IO.StringWriter sw = new System.IO.StringWriter(sb);
+            CodeGeneratorOptions options = new CodeGeneratorOptions();
+            options.BracingStyle = "C";
+            options.BlankLinesBetweenMembers = false;
             if (Generated)
             {
-                cscp.GenerateCodeFromCompileUnit(CCU, sw, new CodeGeneratorOptions());
+                cscp.GenerateCodeFromCompileUnit(CCU, sw, options);
             }
             else
             {
-                cscp.GenerateCodeFromNamespace(CCU.Namespaces[0], sw, new CodeGeneratorOptions());
+                cscp.GenerateCodeFromNamespace(CCU.Namespaces[0], sw, options);
             }
             return sb.ToString();
         }

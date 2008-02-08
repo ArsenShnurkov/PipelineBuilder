@@ -78,7 +78,7 @@ namespace VSPipelineBuilder
             this.b_ok.Name = "b_ok";
             this.b_ok.Size = new System.Drawing.Size(75, 23);
             this.b_ok.TabIndex = 0;
-            this.b_ok.Text = "Ok";
+            this.b_ok.Text = "OK";
             this.b_ok.UseVisualStyleBackColor = true;
             // 
             // b_cancel

@@ -70,6 +70,7 @@
     <Compile Include="DisplayError.Designer.cs">
       <DependentUpon>DisplayError.cs</DependentUpon>
     </Compile>
+    <Compile Include="GeneratedDirectoryInfo.cs" />
     <Compile Include="IPipelineBuilderWorker.cs" />
     <Compile Include="PipelineConfiguration.cs">
       <SubType>Form</SubType>
