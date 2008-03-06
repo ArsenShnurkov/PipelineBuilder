@@ -73,6 +73,10 @@ namespace VSPipelineBuilder
                 {
                     contractProject = project;
                 }
+                else if (contractProject == null && project.Name.Contains("Contract"))
+                {
+                    contractProject = project;
+                }
             }
             if (contractProject != null)
             {

@@ -28,6 +28,15 @@ namespace Samples.Common.Contracts
     public interface IAppObjectContract : IContract
     {
         IDocContract OpenDocument(string path);
+        DetailedDocInfo GetDetailedInfo(IDocContract doc);
+
+        //By passing a group of structs across in an array instead of an IListContract you can increase performance by
+        //reducing the number of AppDomain transitions. The majority of the cost of crossing the boundary is fixed and you 
+        //only pay a very small cost for each additional byte you include in that transtion.
+        DetailedDocInfo[] AvailableDocuments
+        {
+            get;
+        }
 
 
         //This will get translated to an IList<IDoc> in the views
@@ -101,5 +110,34 @@ namespace Samples.Common.Contracts
     public enum DocPriorityContract
     {
         High = 0, Medium = 1, Low = 2
+    }
+
+    //By using structs to pass across large amounts of data you can increase performance and decrease the
+    //number of AppDomain transitions you make. All serialized data in the struct will be serialized at once.
+    [Serializable]
+    public struct DetailedDocInfo
+    {
+        string _path;
+
+        public string Path
+        {
+            get { return _path; }
+            set { _path = value; }
+        }
+
+        byte[] _contents;
+
+        public byte[] Contents
+        {
+            get { return _contents; }
+            set { _contents = value; }
+        }
+
+        //The names of the input parameters to the constructor must match the names of the corresponding properties. 
+        public DetailedDocInfo(String path, byte[] contents)
+        {
+            _path = path;
+            _contents = contents;
+        }
     }
 }
