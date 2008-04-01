@@ -54,6 +54,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy /y "D:\AppBuilding\PipelineBuilder\PipelineHints\bin\Debug\PipelineHints.*" "D:\VS Pipeline Builder\."</PostBuildEvent>
+    <PostBuildEvent>copy /y "D:\Projects\ClrAddIns\Pipeline Builder\PipelineBuilder\PipelineHints\bin\Debug\PipelineHints.*" "D:\VS Pipeline Builder\."</PostBuildEvent>
   </PropertyGroup>
 </Project>

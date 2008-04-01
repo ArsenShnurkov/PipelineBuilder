@@ -34,7 +34,7 @@ namespace PipelineBuilder
             
         }
 
-       
+      
         public void Init(String assemblyPath, bool newDomain)
         {
             _asmPath = assemblyPath;
@@ -348,7 +348,7 @@ namespace PipelineBuilder
                 prop.Name = pi.Name;
                 prop.HasGet = true;
                 prop.HasSet = false;
-                prop.Type = GetViewTypeReference(viewType, pi.PropertyType, contractType);
+                prop.Type = GetViewTypeReference(viewType, pi.PropertyType, contractType,SegmentDirection.None);
                 prop.GetStatements.Add(
                         new CodeMethodReturnStatement(
                             new CodeVariableReferenceExpression(ConvertNameToField(pi.Name))));
@@ -368,7 +368,7 @@ namespace PipelineBuilder
             {
                 CodeParameterDeclarationExpression param = new CodeParameterDeclarationExpression();
                 param.Name = pi.Name;
-                param.Type = GetViewTypeReference(viewType, pi.ParameterType, contractType);
+                param.Type = GetViewTypeReference(viewType, pi.ParameterType, contractType,SegmentDirection.None);
                 constructor.Parameters.Add(param);
                 CodeMemberField field = new CodeMemberField();
                 field.Name = ConvertNameToField(pi.Name);
@@ -617,7 +617,7 @@ namespace PipelineBuilder
                 method.Attributes = MemberAttributes.Abstract | MemberAttributes.Public;
                 method.Name = mi.Name;
                 //Setup the return type for this member in the view
-                method.ReturnType = GetViewTypeReference(componentType, mi.ReturnType,contractType);
+                method.ReturnType = GetViewTypeReference(componentType, mi.ReturnType,contractType,SegmentDirection.None);
                 //For each parameter in the method in the contract, add the right one to the view
                 AddParametersToViewMethod(componentType, mi, method);
                 object[] methodComments = mi.GetCustomAttributes(typeof(PipelineHints.CommentAttribute), false);
@@ -643,7 +643,7 @@ namespace PipelineBuilder
             //Iterate through each parameter on the type in the original contract method
             foreach (ParameterInfo pi in mi.GetParameters())
             {
-                CodeTypeReference paramType = GetViewTypeReference(componentType, pi.ParameterType, mi.DeclaringType);
+                CodeTypeReference paramType = GetViewTypeReference(componentType, pi.ParameterType, mi.DeclaringType,SegmentDirection.None);
                 CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(paramType, pi.Name);
                 if (IsOut(pi))
                 {
@@ -693,7 +693,38 @@ namespace PipelineBuilder
             return contractType;
         }
 
-        private CodeTypeReference GetViewTypeReference(SegmentType componentType, Type contractType, Type declaringType)
+        //private CodeTypeReference GetViewTypeReference(SegmentType componentType, Type contractType, Type declaringType)
+        //{
+        //    //If the return value does not need adapting set the return value as the actual type. 
+        //    //If it needs adapting but is not an IlistContract set the return value as the view type for the specified return value, 
+        //    //otherwise set the return type as IList<TView> for the IListContract<TContract>
+        //    contractType = GetCannonicalContractType(contractType);
+            
+        //    if (!TypeNeedsAdapting(contractType))
+        //    {
+        //        return new CodeTypeReference(contractType);
+        //    }
+        //    else
+        //    {
+        //        if (IsIListContract(contractType))
+        //        {
+        //            CodeTypeReference returnType = GetIListContractTypeRef(componentType, SegmentDirection.None, contractType, declaringType);
+        //            return returnType;
+        //        }
+        //        else if (IsNativeHandle(contractType))
+        //        {
+        //            return GetNativeHandleViewType(SegmentDirection.ViewToContract);
+        //        }
+        //        else
+        //        {
+        //            return new CodeTypeReference(_symbols.GetNameFromType(contractType, componentType, SegmentDirection.None,declaringType));
+        //        }
+
+
+        //    }
+        //}
+
+        private CodeTypeReference GetViewTypeReference(SegmentType componentType, Type contractType, Type declaringType,SegmentDirection direction)
         {
             //If the return value does not need adapting set the return value as the actual type. 
             //If it needs adapting but is not an IlistContract set the return value as the view type for the specified return value, 
@@ -708,7 +739,7 @@ namespace PipelineBuilder
             {
                 if (IsIListContract(contractType))
                 {
-                    CodeTypeReference returnType = GetIListContractTypeRef(componentType, SegmentDirection.None, contractType, declaringType);
+                    CodeTypeReference returnType = GetIListContractTypeRef(componentType, direction, contractType, declaringType);
                     return returnType;
                 }
                 else if (IsNativeHandle(contractType))
@@ -717,7 +748,7 @@ namespace PipelineBuilder
                 }
                 else
                 {
-                    return new CodeTypeReference(_symbols.GetNameFromType(contractType, componentType, SegmentDirection.None,declaringType));
+                    return new CodeTypeReference(_symbols.GetNameFromType(contractType, componentType, direction,declaringType));
                 }
 
 
@@ -1522,7 +1553,7 @@ namespace PipelineBuilder
                         //If no adapting is needed just pass on through, else find the right adapter and use it
                         foreach (ParameterInfo pi in mi.GetParameters())
                         {
-                            CodeTypeReference paramViewType = GetViewTypeReference(viewType, pi.ParameterType, contractType);
+                            CodeTypeReference paramViewType = GetViewTypeReference(viewType, pi.ParameterType, contractType,SegmentDirection.ViewToContract);
                             Type paramContractType = GetCannonicalContractType(pi.ParameterType);
                             if (!TypeNeedsAdapting(paramContractType))
                             {
@@ -2003,14 +2034,14 @@ namespace PipelineBuilder
                     }
                     else
                     {
-                        method.ReturnType = GetViewTypeReference(viewType, mi.ReturnType, mi.DeclaringType);
+                        method.ReturnType = GetViewTypeReference(viewType, mi.ReturnType, mi.DeclaringType,SegmentDirection.ContractToView);
                         ret.Expression = CallStaticAdapter(componentType, mi.ReturnType, cmi, SegmentDirection.ContractToView);
                     }
                     CodeStatementCollection prologue = new CodeStatementCollection();
                     CodeStatementCollection epilogue = new CodeStatementCollection();
                     foreach (ParameterInfo pi in mi.GetParameters())
                     {
-                        CodeTypeReference paramType = GetViewTypeReference(viewType, pi.ParameterType, contractType);
+                        CodeTypeReference paramType = GetViewTypeReference(viewType, pi.ParameterType, contractType,SegmentDirection.ContractToView);
                         if (!TypeNeedsAdapting(pi.ParameterType))
                         {
                             CodeParameterDeclarationExpression cp = new CodeParameterDeclarationExpression(paramType, pi.Name);
@@ -2096,7 +2127,7 @@ namespace PipelineBuilder
                             method.Statements.AddRange(prologue);
                             if (epilogue.Count > 0)
                             {
-                                CodeVariableDeclarationStatement retVar = new CodeVariableDeclarationStatement(GetViewTypeReference(viewType, mi.ReturnType, mi.DeclaringType), "return_variable");
+                                CodeVariableDeclarationStatement retVar = new CodeVariableDeclarationStatement(GetViewTypeReference(viewType, mi.ReturnType, mi.DeclaringType,SegmentDirection.ViewToContract), "return_variable");
                                 retVar.InitExpression = ret.Expression;
                                 ret = new CodeMethodReturnStatement(new CodeVariableReferenceExpression(retVar.Name));
                                 method.Statements.Add(retVar);
