@@ -456,6 +456,13 @@ namespace PipelineBuilder
                 new CodeParameterDeclarationExpression(source, paramName));
             CodeVariableDeclarationStatement result = new CodeVariableDeclarationStatement(destination, "result");
             CodeVariableReferenceExpression input = new CodeVariableReferenceExpression(paramName);
+
+            CodeConditionStatement nullContractCheck = new CodeConditionStatement();
+            nullContractCheck.Condition = new CodeBinaryOperatorExpression(input, CodeBinaryOperatorType.IdentityEquality, new CodePrimitiveExpression(null));
+            nullContractCheck.TrueStatements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression(null)));
+            adapter.Statements.Add(nullContractCheck);
+
+            
             result.InitExpression = new CodeArrayCreateExpression(destination, new CodePropertyReferenceExpression(input, "Length"));
             //for (int i = 0;i < paramName.Length;i = i + 1)
             CodeIterationStatement init = new CodeIterationStatement();
@@ -1115,6 +1122,10 @@ namespace PipelineBuilder
             cva.ReturnType = viewType;
             CodeParameterDeclarationExpression contractParam = new CodeParameterDeclarationExpression(contractType, "contract");
             cva.Parameters.Add(contractParam);
+
+           
+
+
             if (contractType.IsArray)
             {
                 return CreateArrayContractToViewStaticAdapter(contractType, componentType, viewType);
@@ -1130,6 +1141,13 @@ namespace PipelineBuilder
             }
             else
             {
+                //Check for null contract and return null instead of adapting
+                CodeVariableReferenceExpression contract = new CodeVariableReferenceExpression("contract");
+                CodeConditionStatement nullContractCheck = new CodeConditionStatement();
+                nullContractCheck.Condition = new CodeBinaryOperatorExpression(contract, CodeBinaryOperatorType.IdentityEquality, new CodePrimitiveExpression(null));
+                nullContractCheck.TrueStatements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression(null)));
+                cva.Statements.Add(nullContractCheck);
+
                 #region TryUpCast
                 List<Type> subTypes;
                 if (_typeHierarchy.TryGetValue(contractType, out subTypes))
@@ -1164,7 +1182,6 @@ namespace PipelineBuilder
 
                 String outgoingAdapterName = _symbols.GetNameFromType(contractType, componentType, SegmentDirection.ViewToContract, false);
                 CodeConditionStatement tryCast = new CodeConditionStatement();
-                CodeVariableReferenceExpression contract = new CodeVariableReferenceExpression("contract");
                 //Create a new ViewToContractAdapter and pass out
                 CodeObjectCreateExpression adapterNew = new CodeObjectCreateExpression(adapterType, contract);
                 tryCast.FalseStatements.Add(new CodeMethodReturnStatement(adapterNew));
@@ -1202,6 +1219,8 @@ namespace PipelineBuilder
             vca.ReturnType = new CodeTypeReference(contractType);
             CodeParameterDeclarationExpression viewParam = new CodeParameterDeclarationExpression(viewType, "view");
             vca.Parameters.Add(viewParam);
+
+           
             if (contractType.IsArray)
             {
                 return CreateArrayViewToContractStaticAdapter(contractType, componentType, viewType);
@@ -1217,6 +1236,13 @@ namespace PipelineBuilder
             }
             else
             {
+                //Check for null contract and return null instead of adapting
+                CodeVariableReferenceExpression view = new CodeVariableReferenceExpression("view");
+                CodeConditionStatement nullContractCheck = new CodeConditionStatement();
+                nullContractCheck.Condition = new CodeBinaryOperatorExpression(view, CodeBinaryOperatorType.IdentityEquality, new CodePrimitiveExpression(null));
+                nullContractCheck.TrueStatements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression(null)));
+                vca.Statements.Add(nullContractCheck);
+
                 List<Type> subTypes = new List<Type>();
                 _typeHierarchy.TryGetValue(contractType, out subTypes);
                 if (subTypes != null)
@@ -1240,7 +1266,6 @@ namespace PipelineBuilder
 
                 String incomingAdapterName = _symbols.GetNameFromType(contractType, componentType, SegmentDirection.ContractToView, false);
                 CodeConditionStatement tryCast = new CodeConditionStatement();
-                CodeVariableReferenceExpression view = new CodeVariableReferenceExpression("view");
                 //Create a new ViewToContractAdapter and pass out
                 CodeObjectCreateExpression adapterNew = new CodeObjectCreateExpression(adapterType, view);
                 tryCast.FalseStatements.Add(new CodeMethodReturnStatement(adapterNew));
@@ -1337,8 +1362,10 @@ namespace PipelineBuilder
                     CodeObjectCreateExpression adaptedArgs = new CodeObjectCreateExpression();
                     adaptedArgs.Parameters.Add(new CodeVariableReferenceExpression("args"));
                     adaptedArgs.CreateType = new CodeTypeReference(_symbols.GetNameFromType(pi.ParameterType, componentType, SegmentDirection.ContractToView, contractType));
+                    adaptedArgs.CreateType = GetViewTypeReference(viewType, pi.ParameterType, contractType, SegmentDirection.ContractToView);
                     CodeVariableDeclarationStatement adapterArgsDeclare = new CodeVariableDeclarationStatement(adaptedArgs.CreateType, "adaptedArgs");
                     CodeAssignStatement assignArgs = new CodeAssignStatement(new CodeVariableReferenceExpression("adaptedArgs"), adaptedArgs);
+                    assignArgs.Right = CallStaticAdapter(componentType, pi.ParameterType, new CodeTypeReferenceExpression("args"), SegmentDirection.ContractToView);
                     adaptArgs.Add(adapterArgsDeclare);
                     adaptArgs.Add(assignArgs);
                     args = new CodeVariableReferenceExpression("adaptedArgs");
