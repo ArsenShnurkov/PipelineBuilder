@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
+using PipelineBuilder;
 
 
 namespace VSPipelineBuilder
@@ -41,8 +43,7 @@ namespace VSPipelineBuilder
                 //There is no pre-computed check-sum. 
                 return true;
             }
-            current.CheckForEdits(original);
-            return true;
+            return !current.HasEdits(original);
         }
 
         public static void StoreCheckSum(string path)
@@ -50,36 +51,54 @@ namespace VSPipelineBuilder
             new CheckSumValidator(path).WriteResults();
         }
 
-        private void CheckForEdits(CheckSumValidator original)
+		/// <summary>
+		/// Checks for edit and return true if there were edits.
+		/// </summary>
+		/// <param name="original"></param>
+		/// <returns></returns>
+        private bool HasEdits(CheckSumValidator original)
         {
             foreach (string s in original._files.Keys)
             {
-                byte[] currentHash;
-                if (_files.TryGetValue(s, out currentHash))
-                {
-                    byte[] originalHash = original._files[s];
-                    if (currentHash.Length != originalHash.Length)
-                    {
-                        throw new InvalidOperationException("File has been edited and left in the ''Generated Files'' folder. Please move it from this folder to prevent these changes from being lost. File: " + s);
-                    }
-                    for (int i = 0; i < originalHash.Length; i++)
-                    {
-                        if (!originalHash[i].Equals(currentHash[i]))
-                        {
-                            throw new InvalidOperationException("File has been edited and left in the ''Generated Files'' folder. Please move it from this folder to prevent these changes from being lost. File: " + s);
-                        }
-                    }
-                }
-            }
-            foreach (string s in _files.Keys)
-            {
-                if (!original._files.ContainsKey(s))
-                {
-                    throw new InvalidOperationException("File has been added to the ''Generated Files'' folder manually. Please move it from this folder to prevent this file from being lost. File: " + s);
-                }
-            }
-        }
+            	byte[] currentHash;
+            	if (!_files.TryGetValue(s, out currentHash)) continue;
+            	
+				byte[] originalHash = original._files[s];
+				
+            	if (currentHash.Length == originalHash.Length &&
+            	    originalHash.AllTrue((index, currByte) => currentHash[index].Equals(currByte))) 
+					continue;
 
+            	if (MessageBox.Show(string.Format(
+            	                	"File has been edited and left in the ''Generated Files'' folder. Would you like " 
+            	                	+ "to overwrite it? File: {0}.", s),
+            	                "Edited file in generated folder",
+            	                MessageBoxButtons.YesNo) == DialogResult.Yes)
+            	{
+            		continue; // continue checking, ignore this file.
+            	}
+            	
+				return true;
+            }
+
+        	foreach (var s in _files.Keys)
+            {
+            	if (original._files.ContainsKey(s)) continue;
+
+            	if(MessageBox.Show(string.Format(
+            	                   	"File has been added to the \"Generated Files\" folder manually. "
+									+ "Would you like to overwrite it? File: {0}.", s),
+            	                   "Added file in generated folder",
+            	                   MessageBoxButtons.YesNo) == DialogResult.Yes)
+            	{
+            		continue; // continue checking, ignore this file.
+            	}
+
+            	return true;
+            }
+
+			return false;
+        }
 
         private static CheckSumValidator GetInfo(string path)
         {

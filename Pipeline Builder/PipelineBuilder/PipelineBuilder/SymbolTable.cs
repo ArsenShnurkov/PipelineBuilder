@@ -41,15 +41,15 @@ namespace PipelineBuilder
             if (contractNamespace.EndsWith(".Contracts") || contractNamespace.EndsWith(".Contract"))
             {
                 string viewNamespace = contractNamespace.Remove(contractNamespace.LastIndexOf("."));
-                if (!(component.Equals(SegmentType.ASA) || component.Equals(SegmentType.HSA)))
+                if (!(component.Equals(SegmentType.AddInSideAdapter) || component.Equals(SegmentType.HostSideAdapter)))
                 {
                     return viewNamespace;
                 }
-                else if (component.Equals(SegmentType.ASA))
+                else if (component.Equals(SegmentType.AddInSideAdapter))
                 {
                     return viewNamespace + ".AddInSideAdapters";
                 }
-                else if (component.Equals(SegmentType.HSA))
+                else if (component.Equals(SegmentType.HostSideAdapter))
                 {
                     return viewNamespace + ".HostSideAdapters";
                 }
@@ -58,15 +58,15 @@ namespace PipelineBuilder
             {
                 switch (component)
                 {
-                    case SegmentType.AIB:
+                    case SegmentType.AddInView:
                         return contractNamespace + ".AddInViews";
-                    case SegmentType.ASA:
+                    case SegmentType.AddInSideAdapter:
                         return contractNamespace + ".AddInSideAdapters";
-                    case SegmentType.HAV:
+                    case SegmentType.HostAddInView:
                         return contractNamespace + ".HostViews";
-                    case SegmentType.HSA:
+                    case SegmentType.HostSideAdapter:
                         return contractNamespace + ".HostSideAdapters";
-                    case SegmentType.VIEW:
+                    case SegmentType.View:
                         return contractNamespace + ".Views";
                     default:
                         throw new InvalidOperationException("Component is not a valid type: " + component + "/" + contractType.FullName);
@@ -78,24 +78,24 @@ namespace PipelineBuilder
 
         internal static bool ComponentsAreEquivalent(SegmentType component, PipelineHints.PipelineSegment pipelineHints)
         {
-            if (component.Equals(SegmentType.ASA) && pipelineHints.Equals(PipelineHints.PipelineSegment.AddInSideAdapter))
+            if (component.Equals(SegmentType.AddInSideAdapter) && pipelineHints.Equals(PipelineHints.PipelineSegment.AddInSideAdapter))
             {
                 return true;
             }
-            if (component.Equals(SegmentType.HSA) && pipelineHints.Equals(PipelineHints.PipelineSegment.HostSideAdapter))
+            if (component.Equals(SegmentType.HostSideAdapter) && pipelineHints.Equals(PipelineHints.PipelineSegment.HostSideAdapter))
             {
                 return true;
             }
-            if (component.Equals(SegmentType.HAV) && pipelineHints.Equals(PipelineHints.PipelineSegment.HostView))
+            if (component.Equals(SegmentType.HostAddInView) && pipelineHints.Equals(PipelineHints.PipelineSegment.HostView))
             {
                 return true;
             }
-            if (component.Equals(SegmentType.AIB) && pipelineHints.Equals(PipelineHints.PipelineSegment.AddInView))
+            if (component.Equals(SegmentType.AddInView) && pipelineHints.Equals(PipelineHints.PipelineSegment.AddInView))
             {
                 return true;
             }
             if ((pipelineHints.Equals(PipelineHints.PipelineSegment.Views) &&
-                    (component.Equals(SegmentType.HAV) || component.Equals(SegmentType.AIB) || component.Equals(SegmentType.VIEW))))
+                    (component.Equals(SegmentType.HostAddInView) || component.Equals(SegmentType.AddInView) || component.Equals(SegmentType.View))))
             {
                 return true;
             }
@@ -105,32 +105,32 @@ namespace PipelineBuilder
 
         internal void InitAssemblyNames(Assembly asm)
         {
-            _assemblyNameMapping[SegmentType.HAV] = "HostView";
-            _assemblyNameMapping[SegmentType.HSA] = "HostSideAdapters";
-            _assemblyNameMapping[SegmentType.ASA] = "AddInSideAdapters";
-            _assemblyNameMapping[SegmentType.AIB] = "AddInView";
-            _assemblyNameMapping[SegmentType.VIEW] = "View";
+            _assemblyNameMapping[SegmentType.HostAddInView] = "HostView";
+            _assemblyNameMapping[SegmentType.HostSideAdapter] = "HostSideAdapters";
+            _assemblyNameMapping[SegmentType.AddInSideAdapter] = "AddInSideAdapters";
+            _assemblyNameMapping[SegmentType.AddInView] = "AddInView";
+            _assemblyNameMapping[SegmentType.View] = "View";
             foreach (PipelineHints.SegmentAssemblyNameAttribute attr in asm.GetCustomAttributes(typeof(PipelineHints.SegmentAssemblyNameAttribute), false))
             {
                 if (attr.Segment.Equals(PipelineHints.PipelineSegment.HostView))
                 {
-                    _assemblyNameMapping[SegmentType.HAV] = attr.Name;
+                    _assemblyNameMapping[SegmentType.HostAddInView] = attr.Name;
                 }
                 if (attr.Segment.Equals(PipelineHints.PipelineSegment.AddInView))
                 {
-                    _assemblyNameMapping[SegmentType.AIB] = attr.Name;
+                    _assemblyNameMapping[SegmentType.AddInView] = attr.Name;
                 }
                 if (attr.Segment.Equals(PipelineHints.PipelineSegment.HostSideAdapter))
                 {
-                    _assemblyNameMapping[SegmentType.HSA] = attr.Name;
+                    _assemblyNameMapping[SegmentType.HostSideAdapter] = attr.Name;
                 }
                 if (attr.Segment.Equals(PipelineHints.PipelineSegment.AddInSideAdapter))
                 {
-                    _assemblyNameMapping[SegmentType.ASA] = attr.Name;
+                    _assemblyNameMapping[SegmentType.AddInSideAdapter] = attr.Name;
                 }
                 if (attr.Segment.Equals(PipelineHints.PipelineSegment.Views))
                 {
-                    _assemblyNameMapping[SegmentType.VIEW] = attr.Name;
+                    _assemblyNameMapping[SegmentType.View] = attr.Name;
                 }
             }
         }
@@ -211,7 +211,7 @@ namespace PipelineBuilder
             }
             if (type.Equals(typeof(System.AddIn.Contract.INativeHandleContract)))
             {
-                if (segmentType.Equals(SegmentType.VIEW) || segmentType.Equals(SegmentType.AIB) || segmentType.Equals(SegmentType.HAV))
+                if (segmentType.Equals(SegmentType.View) || segmentType.Equals(SegmentType.AddInView) || segmentType.Equals(SegmentType.HostAddInView))
                 {
                     return typeof(System.Windows.FrameworkElement).FullName;
                 }
@@ -242,9 +242,9 @@ namespace PipelineBuilder
             }
             if (prefix)
             {
-                if (_sharedView && (segmentType.Equals(SegmentType.HAV) || segmentType.Equals(SegmentType.AIB) || segmentType.Equals(SegmentType.VIEW)))
+                if (_sharedView && (segmentType.Equals(SegmentType.HostAddInView) || segmentType.Equals(SegmentType.AddInView) || segmentType.Equals(SegmentType.View)))
                 {
-                    refPrefix = GetNameSpace(SegmentType.VIEW,underlyingType) + ".";
+                    refPrefix = GetNameSpace(SegmentType.View,underlyingType) + ".";
                 }
                 else
                 {
@@ -253,7 +253,7 @@ namespace PipelineBuilder
             }
             if (type.IsArray)
             {
-                if (segmentType.Equals(SegmentType.ASA) || segmentType.Equals(SegmentType.HSA))
+                if (segmentType.Equals(SegmentType.AddInSideAdapter) || segmentType.Equals(SegmentType.HostSideAdapter))
                 {
                     typeName += "Array";
                 }
@@ -264,15 +264,15 @@ namespace PipelineBuilder
             }
             switch (segmentType) 
             {
-                case SegmentType.HAV:
+                case SegmentType.HostAddInView:
                     return refPrefix + typeName;
-                case SegmentType.HSA:
+                case SegmentType.HostSideAdapter:
                     return refPrefix + typeName + refSuffix + "HostAdapter";
-                case SegmentType.ASA:
+                case SegmentType.AddInSideAdapter:
                     return refPrefix + typeName + refSuffix + "AddInAdapter";
-                case SegmentType.AIB:
+                case SegmentType.AddInView:
                     return refPrefix + typeName;
-                case SegmentType.VIEW:
+                case SegmentType.View:
                     return refPrefix + typeName;
                 default:
                     throw new InvalidOperationException("No segment type specified: " + segmentType);

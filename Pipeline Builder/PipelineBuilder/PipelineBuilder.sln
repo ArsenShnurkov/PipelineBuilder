@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilder", "PipelineBuilder\PipelineBuilder.csproj", "{982A41B2-0C5A-453A-9809-B86E41770D1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilderProgram", "PipelineBuilderProgram\PipelineBuilderProgram.csproj", "{1A59C8DB-420A-4836-8928-8B24A841F827}"
@@ -11,28 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSPipelineBuilder", "VSPipe
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "VSPipelineBuilderSetup", "VSPipelineBuilderSetup\VSPipelineBuilderSetup.vdproj", "{67DA4377-450C-4582-8127-9E79A560B5D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilder.Tests", "PipelineBuilder.Tests\PipelineBuilder.Tests.csproj", "{5405FA0E-9B92-42E7-848E-CB93DD771DBA}"
+EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs05.codeplex.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = PipelineBuilder\\PipelineBuilder.csproj
-		SccProjectName1 = PipelineBuilder
-		SccLocalPath1 = PipelineBuilder
-		SccProjectUniqueName2 = PipelineBuilderProgram\\PipelineBuilderProgram.csproj
-		SccProjectName2 = PipelineBuilderProgram
-		SccLocalPath2 = PipelineBuilderProgram
-		SccProjectUniqueName3 = PipelineHints\\PipelineHints.csproj
-		SccProjectName3 = PipelineHints
-		SccLocalPath3 = PipelineHints
-		SccProjectUniqueName4 = VSPipelineBuilder\\VSPipelineBuilder.csproj
-		SccProjectName4 = VSPipelineBuilder
-		SccLocalPath4 = VSPipelineBuilder
-		SccProjectUniqueName5 = VSPipelineBuilderSetup\\VSPipelineBuilderSetup.vdproj
-		SccProjectName5 = VSPipelineBuilderSetup
-		SccLocalPath5 = VSPipelineBuilderSetup
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -56,8 +37,33 @@ Global
 		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{67DA4377-450C-4582-8127-9E79A560B5D6}.Debug|Any CPU.ActiveCfg = Debug
 		{67DA4377-450C-4582-8127-9E79A560B5D6}.Release|Any CPU.ActiveCfg = Release
+		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs05.codeplex.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = PipelineBuilder\\PipelineBuilder.csproj
+		SccProjectName1 = PipelineBuilder
+		SccLocalPath1 = PipelineBuilder
+		SccProjectUniqueName2 = PipelineBuilderProgram\\PipelineBuilderProgram.csproj
+		SccProjectName2 = PipelineBuilderProgram
+		SccLocalPath2 = PipelineBuilderProgram
+		SccProjectUniqueName3 = PipelineHints\\PipelineHints.csproj
+		SccProjectName3 = PipelineHints
+		SccLocalPath3 = PipelineHints
+		SccProjectUniqueName4 = VSPipelineBuilder\\VSPipelineBuilder.csproj
+		SccProjectName4 = VSPipelineBuilder
+		SccLocalPath4 = VSPipelineBuilder
+		SccProjectUniqueName5 = VSPipelineBuilderSetup\\VSPipelineBuilderSetup.vdproj
+		SccProjectName5 = VSPipelineBuilderSetup
+		SccLocalPath5 = VSPipelineBuilderSetup
 	EndGlobalSection
 EndGlobal

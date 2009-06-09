@@ -105,6 +105,9 @@ namespace PipelineHints
 
         private string _name;
 
+		/// <summary>
+		/// Gets or sets the name of the event in the view classes.
+		/// </summary>
         public string Name
         {
             get { return _name; }
@@ -125,6 +128,9 @@ namespace PipelineHints
 
         private string _name;
 
+		/// <summary>
+		/// Gets or sets the name of the event in the view classes.
+		/// </summary>
         public string Name
         {
             get { return _name; }
@@ -144,6 +150,9 @@ namespace PipelineHints
     {
         private bool _cancelable;
 
+		/// <summary>
+		/// Gets or sets whether the event it cancelable.
+		/// </summary>
         public bool Cancelable
         {
             get { return _cancelable; }
