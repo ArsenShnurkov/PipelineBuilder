@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using EnvDTE;
+using VSLangProj;
+using VSLangProj2;
 
 namespace VSPipelineBuilder
 {
@@ -21,6 +23,17 @@ namespace VSPipelineBuilder
 			foreach (var item in items)
 			{
 				if (((ProjectItem)item).Name == folderName)
+					return true;
+			}
+			return false;
+		}
+
+		public static bool ContainsReference(this References refs, string assemblyLocation)
+		{
+			foreach (var r in refs)
+			{
+				var reference = (Reference2)r;
+				if (reference.Path == assemblyLocation)
 					return true;
 			}
 			return false;
