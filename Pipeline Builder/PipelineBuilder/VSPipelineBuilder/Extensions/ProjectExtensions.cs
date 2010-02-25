@@ -8,6 +8,12 @@ namespace VSPipelineBuilder
 {
 	public static class ProjectExtensions
 	{
+        /// <summary>
+        /// Combines the specified paths.
+        /// </summary>
+        /// <param name="path1">The first path.</param>
+        /// <param name="path2">The second path.</param>
+        /// <returns>Combined path of path1 and path2.</returns>
 		public static string Combine(this string path1, string path2)
 		{
 			if (path2 == null) throw new ArgumentNullException("path2");

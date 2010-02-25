@@ -21,8 +21,20 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_0A6420A08FC3A782083A20776ED2D062"
+        "OwnerKey" = "8:_201E3FBB8B2643779A98D2CE23841999"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_18FC7DB36D5361C4191A0D1B2CBC727C"
         "OwnerKey" = "8:_39CB23FC3CC41D2075AA2C312F67F8DA"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1E6B620F3D404DB1A8A5638EB0EBE8E9"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -75,20 +87,26 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_6A854E6A77174D20985D0C4662703647"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_6E79F7AC3DBC218AF2DBEE60F8420AFB"
+        "OwnerKey" = "8:_B6B197B107D841D0AC6B5569D3130377"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6E79F7AC3DBC218AF2DBEE60F8420AFB"
+        "OwnerKey" = "8:_0A6420A08FC3A782083A20776ED2D062"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6E79F7AC3DBC218AF2DBEE60F8420AFB"
+        "OwnerKey" = "8:_201E3FBB8B2643779A98D2CE23841999"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_78E9DBF7931342A8B7245966ABD17295"
         "OwnerKey" = "8:_201E3FBB8B2643779A98D2CE23841999"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7C3B8D11474D4A4B9DA684DC45B12793"
-        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -141,6 +159,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_F98375FAC22E48539262AD612D4BE443"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_39CB23FC3CC41D2075AA2C312F67F8DA"
         "MsmSig" = "8:_UNDEFINED"
@@ -155,6 +179,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_A21A5425EC7CD9AEBB04E76D979FC88F"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_6E79F7AC3DBC218AF2DBEE60F8420AFB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -184,6 +214,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_0A6420A08FC3A782083A20776ED2D062"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_78E9DBF7931342A8B7245966ABD17295"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -207,7 +243,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\VSPipelineBuilder.msi"
+        "OutputFilename" = "8:..\\output\\Debug\\VSPipelineBuilder.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -239,7 +275,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\VSPipelineBuilderSetup.msi"
+        "OutputFilename" = "8:..\\output\\Release\\VSPipelineBuilderSetup.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -309,6 +345,37 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_0A6420A08FC3A782083A20776ED2D062"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:PipelineBuilder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_0A6420A08FC3A782083A20776ED2D062"
+                    {
+                    "Name" = "8:PipelineBuilder.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:PipelineBuilder.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_33E3A6DECB834D8DB9EA282A51CC84DE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_18FC7DB36D5361C4191A0D1B2CBC727C"
             {
             "SourcePath" = "8:dte80a.olb"
@@ -327,6 +394,26 @@
             "Register" = "3:1"
             "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1E6B620F3D404DB1A8A5638EB0EBE8E9"
+            {
+            "SourcePath" = "8:..\\VSPipelineBuilder\\VSPipelineBuilder.AddIn"
+            "TargetName" = "8:VSPipelineBuilder.AddIn"
+            "Tag" = "8:"
+            "Folder" = "8:_33E3A6DECB834D8DB9EA282A51CC84DE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_2AA57D090D591B7515850FBA484E8091"
@@ -422,10 +509,21 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6A854E6A77174D20985D0C4662703647"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6E79F7AC3DBC218AF2DBEE60F8420AFB"
             {
-            "SourcePath" = "8:..\\VSPipelineBuilder\\bin\\output\\Template.csproj"
-            "TargetName" = "8:Template.csproj"
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:TRUE"
+            "AssemblyAsmDisplayName" = "8:PipelineHints, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3546f02f48709321, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_6E79F7AC3DBC218AF2DBEE60F8420AFB"
+                    {
+                    "Name" = "8:PipelineHints.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:PipelineHints.dll"
+            "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_33E3A6DECB834D8DB9EA282A51CC84DE"
             "Condition" = "8:"
@@ -439,7 +537,7 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_78E9DBF7931342A8B7245966ABD17295"
@@ -471,26 +569,6 @@
             "Register" = "3:1"
             "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7C3B8D11474D4A4B9DA684DC45B12793"
-            {
-            "SourcePath" = "8:..\\VSPipelineBuilder\\bin\\output\\VSPipelineBuilder.AddIn"
-            "TargetName" = "8:VSPipelineBuilder.AddIn"
-            "Tag" = "8:"
-            "Folder" = "8:_33E3A6DECB834D8DB9EA282A51CC84DE"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_91B998DD25D4128793C42080448D31DE"
@@ -615,6 +693,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F98375FAC22E48539262AD612D4BE443"
+            {
+            "SourcePath" = "8:..\\VSPipelineBuilder\\Template.csproj"
+            "TargetName" = "8:Template.csproj"
+            "Tag" = "8:"
+            "Folder" = "8:_33E3A6DECB834D8DB9EA282A51CC84DE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
         }
         "FileType"
         {
@@ -683,7 +781,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Visual Studio Pipeline Builder"
         "ProductCode" = "8:{799A9FF0-5671-45B7-892F-4794A622CA00}"
-        "PackageCode" = "8:{90513E43-A91F-45CB-BBDA-70753A5A921A}"
+        "PackageCode" = "8:{2C56CF86-384B-44F2-A474-93B1E13926ED}"
         "UpgradeCode" = "8:{1F2A5CDE-F0DC-4799-BCB7-DED73C96F273}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"

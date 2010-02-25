@@ -1,9 +1,8 @@
-/// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft Corporation.  All rights reserved.
 using System;
-using System.Reflection;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Reflection;
 using PipelineBuilder;
 
 namespace PipelineBuilderProgram

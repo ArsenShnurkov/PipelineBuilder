@@ -4,8 +4,13 @@ using EnvDTE;
 
 namespace VSPipelineBuilder
 {
-	internal static class ProjectUtil
+	internal static class ProjectHelper
 	{
+        /// <summary>
+        /// Gets the output assembly of a specific project.
+        /// </summary>
+        /// <param name="p">The project.</param>
+        /// <returns>Output assembly.</returns>
 		internal static string GetOutputAssembly(this Project p)
 		{
 			if (p == null) throw new ArgumentNullException("p");

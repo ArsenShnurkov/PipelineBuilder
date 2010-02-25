@@ -32,7 +32,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\output\Debug\</OutputPath>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>4</WarningLevel>
@@ -43,7 +43,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\output\Release\</OutputPath>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>4</WarningLevel>
@@ -72,42 +72,75 @@
     <Reference Include="VSLangProj80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs">
+    <Compile Include="CommandBar.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CommandBar.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Connect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DisplayError.cs">
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Forms\DisplayError.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DisplayError.Designer.cs">
+    <Compile Include="UI\Forms\DisplayError.Designer.cs">
       <DependentUpon>DisplayError.cs</DependentUpon>
     </Compile>
     <Compile Include="GeneratedDirectoryInfo.cs" />
+    <Compile Include="Helpers\PathHelper.cs" />
     <Compile Include="IPipelineBuilderWorker.cs" />
     <Compile Include="PipelineBuilderWorker.cs" />
-    <Compile Include="PipelineConfiguration.cs">
+    <Compile Include="UI\Forms\PipelineConfiguration.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PipelineConfiguration.Designer.cs">
+    <Compile Include="UI\Forms\PipelineConfiguration.Designer.cs">
       <DependentUpon>PipelineConfiguration.cs</DependentUpon>
     </Compile>
     <Compile Include="PlaceHolder.cs" />
-    <Compile Include="ProjectExtensions.cs" />
-    <Compile Include="ProjectUtil.cs" />
+    <Compile Include="Extensions\ProjectExtensions.cs" />
+    <Compile Include="Helpers\ProjectHelper.cs" />
+    <Compile Include="UI\Controls\StepNumber.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\StepNumber.designer.cs">
+      <DependentUpon>StepNumber.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Forms\PathHelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Forms\PathHelpForm.Designer.cs">
+      <DependentUpon>PathHelpForm.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="CommandBar.resx">
       <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommandBar.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="DisplayError.resx">
+    <EmbeddedResource Include="UI\Forms\DisplayError.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DisplayError.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PipelineConfiguration.resx">
+    <EmbeddedResource Include="UI\Forms\PipelineConfiguration.resx">
       <SubType>Designer</SubType>
       <DependentUpon>PipelineConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Controls\StepNumber.resx">
+      <DependentUpon>StepNumber.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +178,14 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Images\Help.png" />
+    <EmbeddedResource Include="UI\Forms\PathHelpForm.resx">
+      <DependentUpon>PathHelpForm.cs</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Template.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -158,6 +199,16 @@
       <Name>PipelineBuilder</Name>
       <Private>False</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <PropertyGroup>
