@@ -52,7 +52,10 @@ namespace PipelineBuilder
 
 		private List<PipelineSegmentSource> buildRemotePipeline()
 		{
-			String baseDir = typeof (PipelineBuilder).Assembly.Location;
+            // jdauble: use Assembly CodeBase instead of Location for correct path when testing with NUnit
+			String baseDir = typeof (PipelineBuilder).Assembly.CodeBase;
+            baseDir = baseDir.Replace( "/", "\\" );
+
 			baseDir = baseDir.Substring(0, baseDir.LastIndexOf("\\"));
 			AppDomain remoteDomain = AppDomain.CreateDomain("WorkerDomain", null, baseDir, null, true);
 			List<PipelineSegmentSource> source;
@@ -2363,16 +2366,16 @@ namespace PipelineBuilder
 			ccu.Namespaces.Add(codeNamespace);
 			component.Files.Add(new SourceFile(typeName, ccu));
 		}
-
-
+                
 		private static CodeSnippetTypeMember GetEventContractToViewFromSnippet(Type t, MethodInfo mi,
 		                                                                       CodeMemberEvent eventField)
 		{
-			EventRemoveAttribute rAttr = null;
-			EventAddAttribute attr = GetEventAdd(mi);
-			MethodInfo rMi = null;
+            PipelineHints.EventRemoveAttribute rAttr = null;
+            PipelineHints.EventAddAttribute attr = GetEventAdd( mi );
+            MethodInfo rMi = null;
 
-			foreach (MethodInfo method in t.GetMethods()) // TODO: Verify!!
+            // jdauble: fixed problem with events in base contracts
+            foreach ( MethodInfo method in GetMethodsFromContract( t, true ) )
 			{
 				if (!IsEventRemove(method) || !GetEventRemove(method).Name.Equals(attr.Name)) continue;
 
