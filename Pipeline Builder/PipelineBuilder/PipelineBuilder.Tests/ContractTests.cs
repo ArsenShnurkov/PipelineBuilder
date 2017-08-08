@@ -49,7 +49,7 @@ namespace PipelineBuilder.Tests
             string sSourcePath = "..\\..\\..\\TestAssemblies\\TestEventInBaseContract\\bin\\release\\Contracts.dll";
             string sDestPath = "..\\..\\..\\TestAssemblies\\TestEventInBaseContract\\output\\";
 
-            if ( Debugger.IsAttached )
+            if ( Debugger.IsAttached || !File.Exists(sSourcePath) )
             {
                 sSourcePath = sSourcePath.Replace( "release", "debug" );
             }

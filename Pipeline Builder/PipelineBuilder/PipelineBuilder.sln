@@ -1,6 +1,10 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestAssemblies", "TestAssemblies", "{8B11C1E8-6AFC-412E-AA0D-9E2EDE35CB46}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilder", "PipelineBuilder\PipelineBuilder.csproj", "{982A41B2-0C5A-453A-9809-B86E41770D1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilderProgram", "PipelineBuilderProgram\PipelineBuilderProgram.csproj", "{1A59C8DB-420A-4836-8928-8B24A841F827}"
@@ -15,8 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilder.Tests", "Pi
 	ProjectSection(ProjectDependencies) = postProject
 		{982A41B2-0C5A-453A-9809-B86E41770D1C} = {982A41B2-0C5A-453A-9809-B86E41770D1C}
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestAssemblies", "TestAssemblies", "{8B11C1E8-6AFC-412E-AA0D-9E2EDE35CB46}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestEventInBaseContract", "TestAssemblies\TestEventInBaseContract\TestEventInBaseContract.csproj", "{2AF51659-6A02-4D19-B251-D772A2BD9E31}"
 EndProject
@@ -43,7 +45,9 @@ Global
 		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{67DA4377-450C-4582-8127-9E79A560B5D6}.Debug|Any CPU.ActiveCfg = Debug
+		{67DA4377-450C-4582-8127-9E79A560B5D6}.Debug|Any CPU.Build.0 = Debug
 		{67DA4377-450C-4582-8127-9E79A560B5D6}.Release|Any CPU.ActiveCfg = Release
+		{67DA4377-450C-4582-8127-9E79A560B5D6}.Release|Any CPU.Build.0 = Release
 		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
