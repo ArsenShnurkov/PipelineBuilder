@@ -59,25 +59,4 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{2AF51659-6A02-4D19-B251-D772A2BD9E31} = {8B11C1E8-6AFC-412E-AA0D-9E2EDE35CB46}
 	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs05.codeplex.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = PipelineBuilder\\PipelineBuilder.csproj
-		SccProjectName1 = PipelineBuilder
-		SccLocalPath1 = PipelineBuilder
-		SccProjectUniqueName2 = PipelineBuilderProgram\\PipelineBuilderProgram.csproj
-		SccProjectName2 = PipelineBuilderProgram
-		SccLocalPath2 = PipelineBuilderProgram
-		SccProjectUniqueName3 = PipelineHints\\PipelineHints.csproj
-		SccProjectName3 = PipelineHints
-		SccLocalPath3 = PipelineHints
-		SccProjectUniqueName4 = VSPipelineBuilder\\VSPipelineBuilder.csproj
-		SccProjectName4 = VSPipelineBuilder
-		SccLocalPath4 = VSPipelineBuilder
-		SccProjectUniqueName5 = VSPipelineBuilderSetup\\VSPipelineBuilderSetup.vdproj
-		SccProjectName5 = VSPipelineBuilderSetup
-		SccLocalPath5 = VSPipelineBuilderSetup
-	EndGlobalSection
 EndGlobal
