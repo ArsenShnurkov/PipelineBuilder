@@ -101,7 +101,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetFileName)" "C:\Program Files\Microsoft\Visual Studio Pipeline Builder\$(TargetFileName)"
-copy /Y "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Microsoft\Visual Studio Pipeline Builder\$(TargetName).pdb"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

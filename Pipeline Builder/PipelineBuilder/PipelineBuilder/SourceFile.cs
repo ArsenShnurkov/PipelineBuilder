@@ -1,6 +1,5 @@
 /// Copyright (c) Microsoft Corporation.  All rights reserved.
 using System;
-using System.Collections.Generic;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
 using System.CodeDom;

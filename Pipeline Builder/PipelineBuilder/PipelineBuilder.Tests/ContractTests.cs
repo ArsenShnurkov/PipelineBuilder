@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
-using NUnit.Framework.Constraints;
 using NUnit.Framework;
-using PipelineBuilder;
 
 namespace PipelineBuilder.Tests
 {

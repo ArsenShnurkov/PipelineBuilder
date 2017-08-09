@@ -75,10 +75,6 @@
       <Project>{52E231F2-D75D-4625-8454-EF0776E7FC00}</Project>
       <Name>PipelineHints</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VSPipelineBuilder\VSPipelineBuilder.csproj">
-      <Project>{BD00F495-3F49-45F2-8447-59A73FAC0AD2}</Project>
-      <Name>VSPipelineBuilder</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

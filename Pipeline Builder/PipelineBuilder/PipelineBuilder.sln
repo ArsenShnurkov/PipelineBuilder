@@ -11,16 +11,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilderProgram", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineHints", "PipelineHints\PipelineHints.csproj", "{52E231F2-D75D-4625-8454-EF0776E7FC00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSPipelineBuilder", "VSPipelineBuilder\VSPipelineBuilder.csproj", "{BD00F495-3F49-45F2-8447-59A73FAC0AD2}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "VSPipelineBuilderSetup", "VSPipelineBuilderSetup\VSPipelineBuilderSetup.vdproj", "{67DA4377-450C-4582-8127-9E79A560B5D6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilder.Tests", "PipelineBuilder.Tests\PipelineBuilder.Tests.csproj", "{5405FA0E-9B92-42E7-848E-CB93DD771DBA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{982A41B2-0C5A-453A-9809-B86E41770D1C} = {982A41B2-0C5A-453A-9809-B86E41770D1C}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestEventInBaseContract", "TestAssemblies\TestEventInBaseContract\TestEventInBaseContract.csproj", "{2AF51659-6A02-4D19-B251-D772A2BD9E31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBuilderExtension", "PipelineBuilderExtension\PipelineBuilderExtension.csproj", "{5D891D93-6B21-49AF-A309-5AFA00989752}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{62DE8A40-BA9F-42F2-B1B1-CFE99D39A4EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,14 +40,6 @@ Global
 		{52E231F2-D75D-4625-8454-EF0776E7FC00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52E231F2-D75D-4625-8454-EF0776E7FC00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52E231F2-D75D-4625-8454-EF0776E7FC00}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD00F495-3F49-45F2-8447-59A73FAC0AD2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{67DA4377-450C-4582-8127-9E79A560B5D6}.Debug|Any CPU.ActiveCfg = Debug
-		{67DA4377-450C-4582-8127-9E79A560B5D6}.Debug|Any CPU.Build.0 = Debug
-		{67DA4377-450C-4582-8127-9E79A560B5D6}.Release|Any CPU.ActiveCfg = Release
-		{67DA4377-450C-4582-8127-9E79A560B5D6}.Release|Any CPU.Build.0 = Release
 		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5405FA0E-9B92-42E7-848E-CB93DD771DBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,11 +48,17 @@ Global
 		{2AF51659-6A02-4D19-B251-D772A2BD9E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AF51659-6A02-4D19-B251-D772A2BD9E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AF51659-6A02-4D19-B251-D772A2BD9E31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D891D93-6B21-49AF-A309-5AFA00989752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D891D93-6B21-49AF-A309-5AFA00989752}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D891D93-6B21-49AF-A309-5AFA00989752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D891D93-6B21-49AF-A309-5AFA00989752}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{8B11C1E8-6AFC-412E-AA0D-9E2EDE35CB46} = {62DE8A40-BA9F-42F2-B1B1-CFE99D39A4EB}
+		{5405FA0E-9B92-42E7-848E-CB93DD771DBA} = {62DE8A40-BA9F-42F2-B1B1-CFE99D39A4EB}
 		{2AF51659-6A02-4D19-B251-D772A2BD9E31} = {8B11C1E8-6AFC-412E-AA0D-9E2EDE35CB46}
 	EndGlobalSection
 EndGlobal

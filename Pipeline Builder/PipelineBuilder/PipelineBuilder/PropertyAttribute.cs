@@ -1,11 +1,9 @@
 /// Copyright (c) Microsoft Corporation.  All rights reserved.
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PipelineBuilder
 {
-     internal class PropertyMethodInfo
+    internal class PropertyMethodInfo
     {
         PropertyType _type;
 
